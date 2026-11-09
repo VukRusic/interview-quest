@@ -1,0 +1,7 @@
+node_modules
+dist
+dev-dist
+.superpowers
+*.local
+.DS_Store
+coverage

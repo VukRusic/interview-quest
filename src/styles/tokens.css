@@ -1,0 +1,202 @@
+/* Interview Quest tokens: a calm trail map. Mist paper, pine ink, sun for what is learned. */
+:root {
+  color-scheme: light;
+  --paper: #eef2ef;
+  --surface: #f8faf8;
+  --surface-2: #e3e9e5;
+  --ink: #1f2a2e;
+  --ink-soft: #4f5f62;
+  --line: #c9d4cf;
+  --pine: #2f6b5a;
+  --pine-soft: #d5e6df;
+  --on-pine: #f8faf8;
+  --sun: #d99a1e;
+  --sun-soft: #f6e6c3;
+  --good: #2f7a4f;
+  --good-soft: #d9eedf;
+  --bad: #b2453b;
+  --bad-soft: #f5dcd8;
+  --focus: #1d5fa8;
+
+  --font-display: 'Bricolage Grotesque Variable', 'Avenir Next', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-code: 'JetBrains Mono Variable', ui-monospace, Menlo, monospace;
+
+  --gutter: 16px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --radius-s: 6px;
+  --radius-m: 12px;
+  --radius-l: 20px;
+  --measure: 640px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --paper: #141b1c;
+    --surface: #1c2526;
+    --surface-2: #253032;
+    --ink: #e4ebe8;
+    --ink-soft: #a3b2b0;
+    --line: #34413f;
+    --pine: #72b8a1;
+    --pine-soft: #1f3a33;
+    --on-pine: #0f1615;
+    --sun: #e8bf62;
+    --sun-soft: #3b3220;
+    --good: #7cc99a;
+    --good-soft: #1d3527;
+    --bad: #ec8b80;
+    --bad-soft: #42241f;
+    --focus: #8ab8f0;
+  }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #141b1c;
+  --surface: #1c2526;
+  --surface-2: #253032;
+  --ink: #e4ebe8;
+  --ink-soft: #a3b2b0;
+  --line: #34413f;
+  --pine: #72b8a1;
+  --pine-soft: #1f3a33;
+  --on-pine: #0f1615;
+  --sun: #e8bf62;
+  --sun-soft: #3b3220;
+  --good: #7cc99a;
+  --good-soft: #1d3527;
+  --bad: #ec8b80;
+  --bad-soft: #42241f;
+  --focus: #8ab8f0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  margin: 0 0 var(--space-3);
+  letter-spacing: -0.01em;
+}
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+h2 {
+  font-size: 1.4rem;
+  font-weight: 650;
+}
+h3 {
+  font-size: 1.1rem;
+  font-weight: 650;
+}
+p {
+  margin: 0 0 var(--space-3);
+}
+code,
+pre {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+}
+a {
+  color: var(--pine);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--ink);
+}
+.btn:hover {
+  border-color: var(--pine);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--pine);
+  border-color: var(--pine);
+  color: var(--on-pine);
+}
+.btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-soft);
+}
+
+textarea,
+input[type='text'] {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-s);
+  padding: var(--space-3);
+}
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
