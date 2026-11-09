@@ -1,11 +1,7 @@
 import { ITEMS, type ItemIndex } from '../content/index';
-import type { SrsItem } from './srs';
+import type { Progress } from '../state/progress';
 
-export type ReadinessInput = {
-  srs: Record<string, SrsItem>;
-  selfGrades: Record<string, number>;
-  completed: Record<string, string>;
-};
+export type ReadinessInput = Pick<Progress, 'srs' | 'selfGrades' | 'completed'>;
 
 const clamp01 = (n: number) => (Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0);
 
