@@ -3,6 +3,7 @@ import './styles/app.css';
 import './styles/steps.css';
 import { ProgressProvider } from './state/useProgress';
 import { LessonRoute } from './ui/LessonScreen';
+import { Sprite } from './ui/sprites/Sprite';
 
 function Placeholder({ title }: { title: string }) {
   return <h1>{title}</h1>;
@@ -14,6 +15,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <header className="topbar">
         <div className="topbar-inner">
           <Link to="/" className="brand">
+            <Sprite name="shield" size={3} />
             Interview Quest
           </Link>
           <nav className="nav" aria-label="Main">
