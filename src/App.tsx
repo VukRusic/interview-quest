@@ -1,5 +1,8 @@
 import { HashRouter, NavLink, Route, Routes, Link } from 'react-router-dom';
 import './styles/app.css';
+import './styles/steps.css';
+import { ProgressProvider } from './state/useProgress';
+import { LessonRoute } from './ui/LessonScreen';
 
 function Placeholder({ title }: { title: string }) {
   return <h1>{title}</h1>;
@@ -32,7 +35,7 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Placeholder title="Today" />} />
-      <Route path="/lesson/:lessonId" element={<Placeholder title="Lesson" />} />
+      <Route path="/lesson/:lessonId" element={<LessonRoute />} />
       <Route path="/review" element={<Placeholder title="Review" />} />
       <Route path="/stories" element={<Placeholder title="Stories" />} />
       <Route path="/settings" element={<Placeholder title="Settings" />} />
@@ -42,10 +45,12 @@ export function AppRoutes() {
 
 export default function App() {
   return (
-    <HashRouter>
-      <Shell>
-        <AppRoutes />
-      </Shell>
-    </HashRouter>
+    <ProgressProvider>
+      <HashRouter>
+        <Shell>
+          <AppRoutes />
+        </Shell>
+      </HashRouter>
+    </ProgressProvider>
   );
 }

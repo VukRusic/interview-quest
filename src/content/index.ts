@@ -51,3 +51,11 @@ export function validateContent(units: Unit[]): string[] {
   }
   return errors;
 }
+
+export function findLesson(id: string, units: Unit[] = UNITS) {
+  for (const u of units) {
+    const lesson = u.lessons.find((l) => l.id === id);
+    if (lesson) return { unit: u, lesson };
+  }
+  return undefined;
+}

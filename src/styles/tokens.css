@@ -17,6 +17,10 @@
   --bad: #b2453b;
   --bad-soft: #f5dcd8;
   --focus: #1d5fa8;
+  --code-keyword: #2f6b5a;
+  --code-string: #8a5410;
+  --code-fn: #1d5fa8;
+  --code-number: #9b3d6b;
 
   --font-display: 'Bricolage Grotesque Variable', 'Avenir Next', system-ui, sans-serif;
   --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
@@ -55,6 +59,10 @@
     --bad: #ec8b80;
     --bad-soft: #42241f;
     --focus: #8ab8f0;
+  --code-keyword: #72b8a1;
+  --code-string: #e8bf62;
+  --code-fn: #8ab8f0;
+  --code-number: #e59ac0;
   }
 }
 :root[data-theme='dark'] {
@@ -75,6 +83,10 @@
   --bad: #ec8b80;
   --bad-soft: #42241f;
   --focus: #8ab8f0;
+  --code-keyword: #72b8a1;
+  --code-string: #e8bf62;
+  --code-fn: #8ab8f0;
+  --code-number: #e59ac0;
 }
 
 *,
