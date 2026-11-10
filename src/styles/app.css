@@ -57,6 +57,11 @@
 }
 
 @media (max-width: 560px) {
+  /* backdrop-filter would make the header the containing block of the fixed bottom nav */
+  .topbar {
+    backdrop-filter: none;
+    background: var(--paper);
+  }
   .topbar .nav {
     position: fixed;
     left: 0;

@@ -11,9 +11,12 @@
   },
   "dependencies": {
     "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/view": "^6.43.15",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource/atkinson-hyperlegible": "^5.3.0",
     "@fontsource/pixelify-sans": "^5.3.0",
+    "@lezer/highlight": "^1.2.5",
     "@uiw/react-codemirror": "^4.25.12",
     "@xyflow/react": "^12.12.1",
     "prism-react-renderer": "^2.4.1",
@@ -33,6 +36,8 @@
     "jsdom": "^31.0.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.6",
+    "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.1.0"
-  }
+  },
+  "packageManager": "pnpm@12.18.0"
 }

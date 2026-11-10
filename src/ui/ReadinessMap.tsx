@@ -31,14 +31,23 @@ export function ReadinessMap({ units }: { units: Unit[] }) {
           <ul>
             {[...topics].map(([topic, ids]) => {
               const r = readiness(topic, progress, items);
-              const learned = ids.filter((id) => progress.srs[id] && isLearned(progress.srs[id])).length;
-              const started = ids.filter((id) => progress.srs[id] || progress.selfGrades[id] !== undefined).length;
-              const status =
-                learned === ids.length
-                  ? 'learned'
-                  : started === 0
-                    ? 'not started'
-                    : `${learned} of ${ids.length} learned, ${started - learned} in progress`;
+              const isSelf = (id: string) => {
+                const k = items.get(id)?.step.kind;
+                return k === 'mock' || k === 'story';
+              };
+              const auto = ids.filter((id) => !isSelf(id));
+              const self = ids.filter(isSelf);
+              const learned = auto.filter((id) => progress.srs[id] && isLearned(progress.srs[id])).length;
+              const autoStarted = auto.filter((id) => progress.srs[id]).length;
+              const selfDone = self.filter((id) => progress.selfGrades[id] !== undefined).length;
+              const parts: string[] = [];
+              if (auto.length) {
+                if (learned === auto.length) parts.push('learned');
+                else if (autoStarted === 0) parts.push('not started');
+                else parts.push(`${learned} of ${auto.length} learned, ${autoStarted - learned} in progress`);
+              }
+              if (self.length) parts.push(selfDone ? `${selfDone} of ${self.length} self-graded` : 'not self-graded yet');
+              const status = parts.join('; ');
               return (
                 <li key={topic}>
                   <div className="rd-row">

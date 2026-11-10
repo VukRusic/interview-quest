@@ -1,13 +1,30 @@
 import { useState } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
+import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
+import { EditorView } from '@codemirror/view';
+import { tags as t } from '@lezer/highlight';
 import Markdown from 'react-markdown';
 import type { PythonStep as Py } from '../../content/types';
 import { runTests, type RunOutcome } from '../../python/runPython';
 import type { StepProps } from './types';
 import { Walkthrough } from './Walkthrough';
 
-const extensions = [python()];
+/** Editor colors come from the same CSS tokens as the read-only snippets, so both themes stay legible. */
+const highlight = HighlightStyle.define([
+  { tag: [t.keyword, t.controlKeyword, t.definitionKeyword, t.operatorKeyword, t.bool, t.null], color: 'var(--code-keyword)' },
+  { tag: [t.string, t.special(t.string)], color: 'var(--code-string)' },
+  { tag: [t.function(t.definition(t.variableName)), t.function(t.variableName), t.className], color: 'var(--code-fn)' },
+  { tag: [t.number], color: 'var(--code-number)' },
+  { tag: [t.comment], color: 'var(--ink-soft)', fontStyle: 'italic' },
+  { tag: [t.operator, t.punctuation, t.bracket], color: 'var(--ink-soft)' },
+]);
+
+const extensions = [
+  python(),
+  syntaxHighlighting(highlight),
+  EditorView.contentAttributes.of({ 'aria-label': 'Python code editor' }),
+];
 
 /** JSON value → how Python would print it, so expected values read like `got`. */
 export function pyRepr(v: unknown): string {
@@ -62,7 +79,6 @@ export function PythonStep({ step, onDone }: StepProps<Py>) {
           onChange={setCode}
           extensions={extensions}
           basicSetup={{ foldGutter: false, highlightActiveLine: false }}
-          aria-label="Python code editor"
           theme="none"
         />
       </div>

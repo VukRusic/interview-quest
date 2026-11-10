@@ -795,3 +795,12 @@ h1 .sprite {
   vertical-align: -4px;
   margin-right: var(--space-2);
 }
+
+/* Small numerals read better in the body face than in the pixel face. */
+.flow-n,
+.viz-stats dd,
+.metric-value,
+.palette-count,
+.cell-val {
+  font-family: var(--font-body);
+}

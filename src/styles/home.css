@@ -21,8 +21,8 @@
   background: var(--surface);
 }
 .streak-n {
-  font-family: var(--font-display);
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-weight: 700;
   font-size: 1.1rem;
   line-height: 1.1;
 }

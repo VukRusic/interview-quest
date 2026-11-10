@@ -26,3 +26,26 @@ test('fresh progress: first lesson is next and the streak reads 0 days', () => {
   expect(next).toHaveTextContent('The answer flow');
   expect(within(path).getByText('Caching').closest('li')).toHaveTextContent(/locked/i);
 });
+
+test('self-graded topics are labelled as self-graded, never as learned', async () => {
+  const { memoryStorage } = await import('./helpers');
+  const { saveProgress, emptyProgress } = await import('../../src/state/progress');
+  const storyUnit = UnitSchema.parse({
+    id: 'u2',
+    title: 'Stories',
+    lessons: [
+      { id: 's', title: 'Story', pillar: 'stories', slot: 'extra', steps: [{ kind: 'story', id: 'st', topic: 'behavioural', prompt: 'p', hints: [] }] },
+    ],
+  });
+  const storage = memoryStorage();
+  saveProgress({ ...emptyProgress(), selfGrades: { st: 1 } }, storage);
+  render(
+    <Wrap storage={storage}>
+      <HomeScreen units={[storyUnit]} />
+    </Wrap>,
+  );
+  const meter = screen.getByRole('meter', { name: 'Behavioural stories' });
+  const row = meter.closest('li')!;
+  expect(row).toHaveTextContent('self-graded');
+  expect(row).not.toHaveTextContent(/learned/);
+});

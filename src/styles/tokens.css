@@ -1,3 +1,14 @@
+/* Pixelify's small digits are easy to misread (5 looks like S, 2 like 8), so display text takes
+   its digits from the body face. This face covers only 0-9; letters fall through to Pixelify. */
+@font-face {
+  font-family: 'IQ Digits';
+  src: url('../../node_modules/@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-700-normal.woff2')
+    format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}
+
 /* Interview Quest tokens: a quiet pixel-art quest. Parchment by day, castle stone by night;
    forest green for progress, gold for what is truly learned. */
 :root {
@@ -24,7 +35,7 @@
   --code-number: #8e3466;
   --shadow: #5e4d3a;
 
-  --font-display: 'Pixelify Sans', 'Courier New', monospace;
+  --font-display: 'IQ Digits', 'Pixelify Sans', 'Courier New', monospace;
   --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
   --font-code: 'JetBrains Mono Variable', ui-monospace, Menlo, monospace;
 

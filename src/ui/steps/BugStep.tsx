@@ -5,6 +5,11 @@ import { codeTheme, LANG_LABEL, PRISM_LANG } from '../code';
 import type { StepProps } from './types';
 import { Feedback } from './Feedback';
 
+function linesText(lines: number[]): string {
+  if (lines.length === 1) return `line ${lines[0]}`;
+  return `lines ${lines.slice(0, -1).join(', ')} and ${lines[lines.length - 1]}`;
+}
+
 export function BugStep({ step, onDone }: StepProps<Bug>) {
   const [line, setLine] = useState<number | null>(null);
   const [option, setOption] = useState<number | null>(null);
@@ -81,7 +86,7 @@ export function BugStep({ step, onDone }: StepProps<Bug>) {
       {checked && (
         <Feedback
           correct={correct}
-          title={correct ? 'Spotted it.' : `Not quite. The bug is on line ${step.bugLines.join(', ')}.`}
+          title={correct ? 'Spotted it.' : `Not quite. The bug is on ${linesText(step.bugLines)}.`}
           onContinue={() => onDone({ correct })}
         >
           <p>{step.why}</p>
