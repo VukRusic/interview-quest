@@ -14,8 +14,10 @@ function pyLiteral(text: string): string {
 export function buildHarness(userCode: string, fn: string, tests: PyTest[]): string {
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(fn)) throw new Error(`invalid function name: ${fn}`);
   const data = pyLiteral(JSON.stringify(tests));
+  // Pyodide reuses one interpreter per worker. If an earlier run died at top level it may have left
+  // sys.stdout swapped out, so always start from (and finally print to) the original stream.
   return `import json as __iq_json, sys as __iq_sys, io as __iq_io
-__iq_real_stdout = __iq_sys.stdout
+__iq_sys.stdout = __iq_sys.__stdout__
 __iq_sys.stdout = __iq_io.StringIO()
 
 ${userCode}
@@ -43,7 +45,7 @@ def __iq_run():
     return out
 
 __iq_results = __iq_run()
-__iq_sys.stdout = __iq_real_stdout
+__iq_sys.stdout = __iq_sys.__stdout__
 print(__iq_json.dumps({"results": __iq_results}))
 `;
 }

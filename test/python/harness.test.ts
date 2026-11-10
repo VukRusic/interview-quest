@@ -33,3 +33,40 @@ test('ends by printing a single JSON line', () => {
 test('rejects a function name that is not a Python identifier', () => {
   expect(() => buildHarness(user, 'f); import os; (', [])).toThrow();
 });
+
+// Runs the real harness under CPython (skipped where python3 is missing). Pyodide reuses one
+// interpreter per worker, so a run must not leave sys.stdout swapped out for the next one.
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+const hasPython = (() => {
+  try {
+    execFileSync('python3', ['--version']);
+    return true;
+  } catch {
+    return false;
+  }
+})();
+
+test.skipIf(!hasPython)('a top-level error in user code does not break the next run in the same interpreter', () => {
+  const tests = [{ args: [2], expected: 4 }];
+  const broken = buildHarness('def double(x):\n    return x * 2\nundefined_name\n', 'double', tests);
+  const good = buildHarness('def double(x):\n    return x * 2\n', 'double', tests);
+  const dir = mkdtempSync(join(tmpdir(), 'iq-harness-'));
+  writeFileSync(join(dir, 'a.py'), broken);
+  writeFileSync(join(dir, 'b.py'), good);
+  const driver = `
+import sys
+ns = {}
+try:
+    exec(open(sys.argv[1]).read(), {})
+except Exception:
+    pass
+exec(open(sys.argv[2]).read(), {})
+`;
+  const out = execFileSync('python3', ['-I', '-c', driver, join(dir, 'a.py'), join(dir, 'b.py')]).toString();
+  const last = out.trim().split('\n').pop()!;
+  expect(JSON.parse(last)).toEqual({ results: [{ ok: true, got: '4', error: null }] });
+});
