@@ -57,8 +57,8 @@ export function LessonScreen({ lesson }: { lesson: Lesson }) {
         <p className="lead">{lesson.title}</p>
         {results.graded > 0 && (
           <p>
-            You got {results.correct} of {results.graded} right. Each one comes back for review tomorrow; readiness grows
-            when your answers still hold days later.
+            You got {results.correct} of {results.graded} right. Quick checks come back in tomorrow's review and
+            full problems return later as a re-solve; readiness grows when your answers still hold days later.
           </p>
         )}
         {topics.length > 0 && (

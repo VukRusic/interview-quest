@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { UNITS } from '../content/index';
+import { indexItems, UNITS } from '../content/index';
 import type { Lesson, Unit } from '../content/types';
 import { buildSession } from '../core/session';
 import { displayStreak } from '../core/streak';
@@ -80,6 +80,7 @@ export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
             </div>
           )}
         </li>
+        {session.resolve && <ResolveCard id={session.resolve} units={units} />}
         {card('lesson', session.lesson)}
         {card('practice', session.practice)}
         {session.extras.map((id) => card('extra', id))}
@@ -131,5 +132,25 @@ export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
 
       <ReadinessMap units={units} />
     </div>
+  );
+}
+
+function ResolveCard({ id, units }: { id: string; units: Unit[] }) {
+  const { progress, today } = useProgress();
+  const entry = indexItems(units).get(id);
+  if (!entry) return null;
+  const done = progress.srs[id]?.lastAnswered === today;
+  const title = units.flatMap((u) => u.lessons).find((l) => l.id === entry.lessonId)?.title ?? id;
+  return (
+    <li className={`quest ${done ? 'is-done' : ''}`}>
+      <Link to={`/item/${id}`} className="quest-link">
+        <span className="quest-slot">Re-solve</span>
+        <span className="quest-title">{title}</span>
+        <span className="quest-meta muted">A problem you solved before, back to check it still holds</span>
+        <span className="quest-check" aria-label={done ? 'done' : 'to do'}>
+          {done ? '✓' : ''}
+        </span>
+      </Link>
+    </li>
   );
 }

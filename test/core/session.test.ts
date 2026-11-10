@@ -70,3 +70,40 @@ test('all done → lesson and practice undefined', () => {
   expect(s.practice).toBeUndefined();
   expect(s.extras).toEqual([]);
 });
+
+describe('re-solve: full problems come back occasionally', () => {
+  const probUnit: Unit = UnitSchema.parse({
+    id: 'u',
+    title: 'U',
+    lessons: [
+      {
+        id: 'lp',
+        title: 'P',
+        pillar: 'algo',
+        slot: 'lesson',
+        steps: [
+          { kind: 'sandbox', id: 'sb', topic: 't', scenarioId: 'x' },
+          { kind: 'python', id: 'py', topic: 't', prompt: 'p', fn: 'f', starter: '', tests: [{ args: [], expected: null }], walkthrough: [], reference: 'x' },
+        ],
+      },
+    ],
+  });
+  const srs = (id: string, due: string) => ({ id, box: 0 as const, due, lastAnswered: '2026-11-01' });
+
+  test('the most overdue due problem is offered as a re-solve, never in the quick review', () => {
+    const p: Progress = { ...emptyProgress(), srs: { sb: srs('sb', '2026-11-09'), py: srs('py', '2026-11-05') } };
+    const s = buildSession([probUnit], p, T);
+    expect(s.resolve).toBe('py');
+    expect(s.review).toEqual([]);
+  });
+
+  test('nothing due → no re-solve', () => {
+    const p: Progress = { ...emptyProgress(), srs: { py: srs('py', '2026-11-20') } };
+    expect(buildSession([probUnit], p, T).resolve).toBeUndefined();
+  });
+
+  test('a problem re-solved today stays in today’s session', () => {
+    const p: Progress = { ...emptyProgress(), srs: { py: { id: 'py', box: 1, due: '2026-11-13', lastAnswered: T } } };
+    expect(buildSession([probUnit], p, T).resolve).toBe('py');
+  });
+});

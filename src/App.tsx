@@ -10,6 +10,7 @@ import { StoriesScreen } from './ui/StoriesScreen';
 import { HomeScreen } from './ui/HomeScreen';
 import { ReviewScreen } from './ui/ReviewScreen';
 import { SettingsScreen } from './ui/SettingsScreen';
+import { ItemRoute } from './ui/ItemScreen';
 
 function RecoveryNotice() {
   const { recoveredBackupKey } = useProgress();
@@ -62,6 +63,7 @@ export function AppRoutes() {
       <Route path="/" element={<HomeScreen />} />
       <Route path="/lesson/:lessonId" element={<LessonRoute />} />
       <Route path="/review" element={<ReviewScreen />} />
+      <Route path="/item/:itemId" element={<ItemRoute />} />
       <Route path="/stories" element={<StoriesScreen />} />
       <Route path="/settings" element={<SettingsScreen />} />
       <Route path="*" element={<HomeScreen />} />
