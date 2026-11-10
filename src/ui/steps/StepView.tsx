@@ -3,6 +3,7 @@ import { BugStep } from './BugStep';
 import { ExplainStep } from './ExplainStep';
 import { QuizStep } from './QuizStep';
 import { PythonStep } from './PythonStep';
+import { SandboxStep } from './SandboxStep';
 import type { StepResult } from './types';
 
 /** Renders any step kind. Each kind's component owns its own interaction. */
@@ -16,6 +17,8 @@ export function StepView({ step, onDone }: { step: Step; onDone: (r?: StepResult
       return <BugStep step={step} onDone={onDone} />;
     case 'python':
       return <PythonStep step={step} onDone={onDone} />;
+    case 'sandbox':
+      return <SandboxStep step={step} onDone={onDone} />;
     default:
       return (
         <section className="step">
