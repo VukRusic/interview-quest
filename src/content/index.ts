@@ -1,9 +1,10 @@
 import type { ItemStep, Unit } from './types';
+import { unit1 } from './unit1';
 
 export type ItemEntry = { step: ItemStep; lessonId: string };
 export type ItemIndex = Map<string, ItemEntry>;
 
-export const UNITS: Unit[] = [];
+export const UNITS: Unit[] = [unit1];
 
 /** Every step that has an id, keyed by id. Later duplicates do not overwrite earlier ones. */
 export function indexItems(units: Unit[]): ItemIndex {
