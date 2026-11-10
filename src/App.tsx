@@ -2,13 +2,32 @@ import { HashRouter, NavLink, Route, Routes, Link } from 'react-router-dom';
 import './styles/app.css';
 import './styles/steps.css';
 import './styles/home.css';
-import { ProgressProvider } from './state/useProgress';
+import { ProgressProvider, useProgress } from './state/useProgress';
+import { useState } from 'react';
 import { LessonRoute } from './ui/LessonScreen';
 import { Sprite } from './ui/sprites/Sprite';
 import { StoriesScreen } from './ui/StoriesScreen';
 import { HomeScreen } from './ui/HomeScreen';
 import { ReviewScreen } from './ui/ReviewScreen';
 import { SettingsScreen } from './ui/SettingsScreen';
+
+function RecoveryNotice() {
+  const { recoveredBackupKey } = useProgress();
+  const [hidden, setHidden] = useState(false);
+  if (!recoveredBackupKey || hidden) return null;
+  return (
+    <div className="feedback is-wrong notice" role="alert">
+      <h3>Some saved progress couldn't be read</h3>
+      <p>
+        Everything still valid was kept, stories first. A full copy of the old data is saved in this browser under{' '}
+        <code>{recoveredBackupKey}</code>, so nothing is lost.
+      </p>
+      <button type="button" className="btn" onClick={() => setHidden(true)}>
+        Got it
+      </button>
+    </div>
+  );
+}
 
 export function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -29,7 +48,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </nav>
         </div>
       </header>
-      <main className="main">{children}</main>
+      <main className="main">
+        <RecoveryNotice />
+        {children}
+      </main>
     </div>
   );
 }

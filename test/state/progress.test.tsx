@@ -116,3 +116,49 @@ test('the store saves on every change', () => {
   act(() => result.current.dispatch({ type: 'answer', itemId: 'q9', correct: false, today: result.current.today }));
   expect(loadProgress(s).srs.q9?.box).toBe(0);
 });
+
+describe('rejected stored progress is never silently destroyed', () => {
+  const T = '2026-11-10';
+  const story = { situation: 'S', task: 'T', action: 'A', result: 'R' };
+
+  test('a schema failure backs up the raw data and salvages valid stories', async () => {
+    const { loadProgressDetailed } = await import('../../src/state/progress');
+    const raw = JSON.stringify({ ...emptyProgress(), selfGrades: { x: 1.2 }, stories: { s1: story } });
+    const s = fakeStorage({ [STORAGE_KEY]: raw });
+    const r = loadProgressDetailed(s, T);
+    expect(r.backupKey).toMatch(/^iq\.progress\.backup\./);
+    expect(s.getItem(r.backupKey!)).toBe(raw);
+    expect(r.progress.stories).toEqual({ s1: story });
+    expect(r.progress.selfGrades).toEqual({});
+  });
+
+  test('a newer version is backed up, not overwritten', async () => {
+    const { loadProgressDetailed } = await import('../../src/state/progress');
+    const raw = JSON.stringify({ version: 2, stories: { s1: story } });
+    const s = fakeStorage({ [STORAGE_KEY]: raw });
+    const r = loadProgressDetailed(s, T);
+    expect(s.getItem(r.backupKey!)).toBe(raw);
+  });
+
+  test('valid or empty storage makes no backup', async () => {
+    const { loadProgressDetailed } = await import('../../src/state/progress');
+    const s = fakeStorage();
+    expect(loadProgressDetailed(s, T).backupKey).toBeNull();
+    saveProgress(sample(), s);
+    expect(loadProgressDetailed(s, T).backupKey).toBeNull();
+  });
+
+  test('the store keeps salvaged stories after its first save and tells the user', async () => {
+    const raw = JSON.stringify({ ...emptyProgress(), streak: 'bad', stories: { s1: story } });
+    const s = fakeStorage({ [STORAGE_KEY]: raw });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <ProgressProvider storage={s} today={T}>
+        {children}
+      </ProgressProvider>
+    );
+    const { result } = renderHook(() => useProgress(), { wrapper });
+    expect(result.current.recoveredBackupKey).toMatch(/^iq\.progress\.backup\./);
+    act(() => result.current.dispatch({ type: 'answer', itemId: 'q', correct: true, today: T }));
+    expect(loadProgress(s).stories).toEqual({ s1: story });
+  });
+});

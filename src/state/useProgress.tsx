@@ -1,8 +1,8 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 import { dayKey, isDayKey, type DayKey } from '../core/dates';
 import {
   importProgress,
-  loadProgress,
+  loadProgressDetailed,
   progressReducer,
   saveProgress,
   type Action,
@@ -16,6 +16,8 @@ type Ctx = {
   today: DayKey;
   /** Validates the JSON and replaces progress only when it is valid. */
   importJson: (json: string) => ImportResult;
+  /** Set when stored progress could not be read and a raw copy was kept under this key. */
+  recoveredBackupKey: string | null;
 };
 
 const ProgressContext = createContext<Ctx | null>(null);
@@ -41,8 +43,9 @@ export function ProgressProvider({
   storage?: Storage;
   today?: DayKey;
 }) {
-  const [progress, dispatch] = useReducer(progressReducer, undefined, () => loadProgress(storage));
   const today = todayProp ?? currentDay();
+  const [initial] = useState(() => loadProgressDetailed(storage, today));
+  const [progress, dispatch] = useReducer(progressReducer, initial.progress);
   const first = useRef(true);
 
   useEffect(() => {
@@ -59,7 +62,11 @@ export function ProgressProvider({
     return r;
   }, []);
 
-  const value = useMemo(() => ({ progress, dispatch, today, importJson }), [progress, today, importJson]);
+  const recoveredBackupKey = initial.backupKey;
+  const value = useMemo(
+    () => ({ progress, dispatch, today, importJson, recoveredBackupKey }),
+    [progress, today, importJson, recoveredBackupKey],
+  );
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
 }
 

@@ -4,6 +4,7 @@ import { review, type SrsItem } from '../core/srs';
 import { recordActivity, type Streak } from '../core/streak';
 
 export const STORAGE_KEY = 'iq.progress.v1';
+export const BACKUP_PREFIX = 'iq.progress.backup.';
 
 export type Star = { situation: string; task: string; action: string; result: string };
 
@@ -62,15 +63,73 @@ function defaultStorage(): Storage | undefined {
   }
 }
 
-export function loadProgress(storage: Storage | undefined = defaultStorage()): Progress {
-  try {
-    const raw = storage?.getItem(STORAGE_KEY);
-    if (!raw) return emptyProgress();
-    const parsed = ProgressSchema.safeParse(JSON.parse(raw));
-    return parsed.success ? (parsed.data as Progress) : emptyProgress();
-  } catch {
-    return emptyProgress();
+export type LoadResult = { progress: Progress; backupKey: string | null };
+
+/** Keep each field (and each record entry) that is still valid; drop only what is broken. */
+function salvage(data: unknown): Progress {
+  const p = emptyProgress();
+  if (!data || typeof data !== 'object') return p;
+  const d = data as Record<string, unknown>;
+  const records = {
+    srs: SrsItemSchema,
+    selfGrades: z.number().min(0).max(1),
+    completed: DayKeySchema,
+    stories: StarSchema,
+    mockAnswers: z.string(),
+  } as const;
+  for (const [field, schema] of Object.entries(records) as [keyof typeof records, z.ZodType][]) {
+    const rec = d[field];
+    if (!rec || typeof rec !== 'object') continue;
+    const kept: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(rec)) if (schema.safeParse(v).success) kept[k] = v;
+    (p as Record<string, unknown>)[field] = kept;
   }
+  const streak = ProgressSchema.shape.streak.safeParse(d.streak);
+  if (streak.success) p.streak = streak.data;
+  return p;
+}
+
+/**
+ * Load progress. If stored data fails validation (corruption, a hand edit, a newer app version),
+ * the raw text is copied to a backup key before anything can overwrite it, and every still-valid
+ * field is kept, stories first among them.
+ */
+export function loadProgressDetailed(
+  storage: Storage | undefined = defaultStorage(),
+  today: DayKey = new Date().toISOString().slice(0, 10),
+): LoadResult {
+  let raw: string | null = null;
+  try {
+    raw = storage?.getItem(STORAGE_KEY) ?? null;
+  } catch {
+    return { progress: emptyProgress(), backupKey: null };
+  }
+  if (!raw) return { progress: emptyProgress(), backupKey: null };
+  let data: unknown;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    data = undefined;
+  }
+  const parsed = ProgressSchema.safeParse(data);
+  if (parsed.success) return { progress: parsed.data as Progress, backupKey: null };
+
+  let backupKey: string | null = null;
+  try {
+    if (storage) {
+      let key = `${BACKUP_PREFIX}${today}`;
+      for (let n = 2; storage.getItem(key) !== null; n++) key = `${BACKUP_PREFIX}${today}-${n}`;
+      storage.setItem(key, raw);
+      backupKey = key;
+    }
+  } catch {
+    /* storage full or blocked: nothing more we can do */
+  }
+  return { progress: salvage(data), backupKey };
+}
+
+export function loadProgress(storage: Storage | undefined = defaultStorage()): Progress {
+  return loadProgressDetailed(storage).progress;
 }
 
 export function saveProgress(p: Progress, storage: Storage | undefined = defaultStorage()): void {
