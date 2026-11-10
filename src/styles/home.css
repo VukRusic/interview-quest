@@ -1,0 +1,268 @@
+.home > * + * {
+  margin-top: var(--space-6);
+}
+.home-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.home-head h1 {
+  margin: 0;
+}
+.streak {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--px) solid var(--ink);
+  box-shadow: var(--pixel-shadow);
+  background: var(--surface);
+}
+.streak-n {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+/* Today's quests */
+.quests {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.quest-link {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: 'slot check' 'title check' 'meta check';
+  gap: 2px var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: var(--px) solid var(--ink);
+  box-shadow: var(--pixel-shadow);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+}
+a.quest-link:hover {
+  background: var(--surface-2);
+}
+a.quest-link:active {
+  transform: translate(var(--px), var(--px));
+  box-shadow: none;
+}
+.quest-slot {
+  grid-area: slot;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--pine);
+}
+.quest-title {
+  grid-area: title;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+.quest-meta {
+  grid-area: meta;
+  font-size: 0.85rem;
+}
+.quest-check {
+  grid-area: check;
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: var(--px) solid var(--line);
+  font-weight: 700;
+  color: var(--on-pine);
+}
+.quest.is-done .quest-check {
+  background: var(--pine);
+  border-color: var(--ink);
+}
+.quest.is-done .quest-title {
+  color: var(--ink-soft);
+}
+
+/* Unit trail: a dotted path from milestone to milestone, ending at the castle */
+.unit h2 {
+  margin-bottom: var(--space-4);
+}
+.trail {
+  list-style: none;
+  padding: 0 0 0 22px;
+  margin: 0;
+  position: relative;
+}
+.trail::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 12px;
+  bottom: 40px;
+  border-left: 4px dotted var(--line);
+}
+.trail-step {
+  position: relative;
+  padding: var(--space-1) 0;
+}
+.trail-step::before {
+  content: '';
+  position: absolute;
+  left: -19px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  background: var(--paper);
+  border: var(--px) solid var(--line);
+}
+.trail-step.is-done::before {
+  background: var(--pine);
+  border-color: var(--ink);
+}
+.trail-step.is-next::before {
+  background: var(--sun);
+  border-color: var(--ink);
+}
+.trail-end::before {
+  display: none;
+}
+.trail-end {
+  padding-top: var(--space-3);
+  margin-left: -26px;
+}
+.trail-link {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  color: var(--ink);
+  text-decoration: none;
+  border: var(--px) solid transparent;
+}
+a.trail-link:hover {
+  border-color: var(--line);
+  background: var(--surface);
+}
+.is-next .trail-link {
+  border-color: var(--ink);
+  background: var(--surface);
+  box-shadow: var(--pixel-shadow);
+}
+.is-locked .trail-link {
+  opacity: 0.55;
+}
+.trail-mark {
+  display: grid;
+  place-items: center;
+}
+.trail-text {
+  display: grid;
+}
+.trail-title {
+  font-weight: 700;
+}
+.trail-meta {
+  font-size: 0.82rem;
+}
+.trail-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border: 2px solid var(--line);
+  color: var(--ink-soft);
+}
+.badge-next {
+  border-color: var(--ink);
+  background: var(--sun-soft);
+  color: var(--ink);
+}
+.badge-done {
+  border-color: var(--pine);
+  color: var(--pine);
+}
+.badge-open {
+  border-color: var(--pine);
+  color: var(--ink);
+}
+.unit-done {
+  text-align: center;
+  padding: var(--space-5);
+  border: var(--px) solid var(--ink);
+  box-shadow: var(--pixel-shadow);
+  background: var(--sun-soft);
+}
+
+/* Readiness */
+.readiness .pillar {
+  margin-top: var(--space-4);
+}
+.readiness ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.rd-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+}
+.rd-pct {
+  font-variant-numeric: tabular-nums;
+}
+.rd-bar {
+  height: 14px;
+  border: var(--px) solid var(--ink);
+  background: var(--surface-2);
+  /* pixel tick marks every 25% */
+  background-image: repeating-linear-gradient(90deg, transparent 0 calc(25% - 2px), var(--line) calc(25% - 2px) 25%);
+}
+.rd-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--sun);
+}
+.rd-status {
+  font-size: 0.82rem;
+}
+
+/* Settings */
+.settings > * + * {
+  margin-top: var(--space-5);
+}
+.panel {
+  border: var(--px) solid var(--ink);
+  box-shadow: var(--pixel-shadow);
+  background: var(--surface);
+  padding: var(--space-4);
+}
+.panel > * + * {
+  margin-top: var(--space-3);
+}
+.file-btn {
+  position: relative;
+}
+.file-btn input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+}
+.file-btn:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.review-empty > * + * {
+  margin-top: var(--space-3);
+}

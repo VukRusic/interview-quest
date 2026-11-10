@@ -1,14 +1,14 @@
 import { HashRouter, NavLink, Route, Routes, Link } from 'react-router-dom';
 import './styles/app.css';
 import './styles/steps.css';
+import './styles/home.css';
 import { ProgressProvider } from './state/useProgress';
 import { LessonRoute } from './ui/LessonScreen';
 import { Sprite } from './ui/sprites/Sprite';
 import { StoriesScreen } from './ui/StoriesScreen';
-
-function Placeholder({ title }: { title: string }) {
-  return <h1>{title}</h1>;
-}
+import { HomeScreen } from './ui/HomeScreen';
+import { ReviewScreen } from './ui/ReviewScreen';
+import { SettingsScreen } from './ui/SettingsScreen';
 
 export function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -37,11 +37,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Placeholder title="Today" />} />
+      <Route path="/" element={<HomeScreen />} />
       <Route path="/lesson/:lessonId" element={<LessonRoute />} />
-      <Route path="/review" element={<Placeholder title="Review" />} />
+      <Route path="/review" element={<ReviewScreen />} />
       <Route path="/stories" element={<StoriesScreen />} />
-      <Route path="/settings" element={<Placeholder title="Settings" />} />
+      <Route path="/settings" element={<SettingsScreen />} />
+      <Route path="*" element={<HomeScreen />} />
     </Routes>
   );
 }
