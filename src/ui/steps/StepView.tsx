@@ -4,6 +4,8 @@ import { ExplainStep } from './ExplainStep';
 import { QuizStep } from './QuizStep';
 import { PythonStep } from './PythonStep';
 import { SandboxStep } from './SandboxStep';
+import { MockStep } from './MockStep';
+import { StoryStep } from './StoryStep';
 import type { StepResult } from './types';
 
 /** Renders any step kind. Each kind's component owns its own interaction. */
@@ -19,14 +21,9 @@ export function StepView({ step, onDone }: { step: Step; onDone: (r?: StepResult
       return <PythonStep step={step} onDone={onDone} />;
     case 'sandbox':
       return <SandboxStep step={step} onDone={onDone} />;
-    default:
-      return (
-        <section className="step">
-          <p className="muted">This step type is coming soon.</p>
-          <button type="button" className="btn btn-primary" onClick={() => onDone()}>
-            Continue
-          </button>
-        </section>
-      );
+    case 'mock':
+      return <MockStep step={step} onDone={onDone} />;
+    case 'story':
+      return <StoryStep step={step} onDone={onDone} />;
   }
 }

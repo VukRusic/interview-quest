@@ -4,6 +4,7 @@ import './styles/steps.css';
 import { ProgressProvider } from './state/useProgress';
 import { LessonRoute } from './ui/LessonScreen';
 import { Sprite } from './ui/sprites/Sprite';
+import { StoriesScreen } from './ui/StoriesScreen';
 
 function Placeholder({ title }: { title: string }) {
   return <h1>{title}</h1>;
@@ -39,7 +40,7 @@ export function AppRoutes() {
       <Route path="/" element={<Placeholder title="Today" />} />
       <Route path="/lesson/:lessonId" element={<LessonRoute />} />
       <Route path="/review" element={<Placeholder title="Review" />} />
-      <Route path="/stories" element={<Placeholder title="Stories" />} />
+      <Route path="/stories" element={<StoriesScreen />} />
       <Route path="/settings" element={<Placeholder title="Settings" />} />
     </Routes>
   );

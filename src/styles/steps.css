@@ -698,3 +698,100 @@ div.code-line {
     font-size: 1.05rem;
   }
 }
+
+/* Mock + story */
+.field {
+  display: grid;
+  gap: var(--space-1);
+}
+.field > span {
+  font-weight: 700;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.followup-q {
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+.followup-who {
+  font-family: var(--font-display);
+  color: var(--pine);
+}
+.rubric {
+  border: var(--px) solid var(--ink);
+  box-shadow: var(--pixel-shadow);
+  background: var(--surface);
+  padding: var(--space-4);
+  margin: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.rubric legend {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0 var(--space-2);
+}
+.private-note {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border: 2px dashed var(--line);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.hints {
+  padding-left: 1.2em;
+  color: var(--ink-soft);
+}
+.star {
+  display: grid;
+  gap: var(--space-4);
+}
+.word-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+.word-count.is-over {
+  color: var(--bad);
+  font-weight: 700;
+}
+.story-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.story-item {
+  border: var(--px) solid var(--ink);
+  box-shadow: var(--pixel-shadow);
+  background: var(--surface);
+}
+.story-item .star {
+  padding: 0 var(--space-4) var(--space-4);
+}
+.story-head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: baseline;
+  text-align: left;
+  padding: var(--space-4);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.story-title {
+  font-weight: 700;
+}
+.stories h1 .sprite,
+h1 .sprite {
+  vertical-align: -4px;
+  margin-right: var(--space-2);
+}
