@@ -9,3 +9,9 @@ export function recordActivity(s: Streak, today: DayKey): Streak {
   const current = gap === 1 ? s.current + 1 : 1;
   return { current, best: Math.max(s.best, current), lastDay: today };
 }
+
+/** The streak to show today: a streak whose last day is more than one day ago is already broken. */
+export function displayStreak(s: Streak, today: DayKey): number {
+  if (!s.lastDay) return 0;
+  return daysBetween(s.lastDay, today) > 1 ? 0 : s.current;
+}

@@ -43,7 +43,24 @@ export function ProgressProvider({
   storage?: Storage;
   today?: DayKey;
 }) {
-  const today = todayProp ?? currentDay();
+  const [liveDay, setLiveDay] = useState(currentDay);
+  const today = todayProp ?? liveDay;
+
+  // The app may stay open across midnight (an installed PWA in the background), so re-check the
+  // day on a timer and whenever the tab becomes visible or focused again.
+  useEffect(() => {
+    if (todayProp) return;
+    const refresh = () => setLiveDay(currentDay());
+    const timer = setInterval(refresh, 60_000);
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, [todayProp]);
+
   const [initial] = useState(() => loadProgressDetailed(storage, today));
   const [progress, dispatch] = useReducer(progressReducer, initial.progress);
   const first = useRef(true);

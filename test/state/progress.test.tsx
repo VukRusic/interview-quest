@@ -162,3 +162,33 @@ describe('rejected stored progress is never silently destroyed', () => {
     expect(loadProgress(s).stories).toEqual({ s1: story });
   });
 });
+
+describe('today stays current while the app is open', () => {
+  afterEach(() => vi.useRealTimers());
+
+  test('crossing midnight updates today, so answers count for the new day', () => {
+    vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
+    vi.setSystemTime(new Date(2026, 10, 9, 23, 59, 30));
+    const s = fakeStorage();
+    const wrapper = ({ children }: { children: ReactNode }) => <ProgressProvider storage={s}>{children}</ProgressProvider>;
+    const { result } = renderHook(() => useProgress(), { wrapper });
+    expect(result.current.today).toBe('2026-11-09');
+    act(() => {
+      vi.advanceTimersByTime(90_000);
+    });
+    expect(result.current.today).toBe('2026-11-10');
+  });
+
+  test('coming back to the tab refreshes today', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 9, 22, 0));
+    const s = fakeStorage();
+    const wrapper = ({ children }: { children: ReactNode }) => <ProgressProvider storage={s}>{children}</ProgressProvider>;
+    const { result } = renderHook(() => useProgress(), { wrapper });
+    vi.setSystemTime(new Date(2026, 10, 10, 8, 0));
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    expect(result.current.today).toBe('2026-11-10');
+  });
+});

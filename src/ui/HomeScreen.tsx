@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { UNITS } from '../content/index';
 import type { Lesson, Unit } from '../content/types';
 import { buildSession } from '../core/session';
+import { displayStreak } from '../core/streak';
 import { useProgress } from '../state/useProgress';
 import { PILLAR_LABELS } from './labels';
 import { ReadinessMap } from './ReadinessMap';
@@ -45,7 +46,7 @@ export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
         <div className="streak">
           <Sprite name="flame" size={4} />
           <div>
-            <div className="streak-n">{s.current} day streak</div>
+            <div className="streak-n">{displayStreak(s, today)} day streak</div>
             <div className="muted small">Best: {s.best}</div>
           </div>
         </div>

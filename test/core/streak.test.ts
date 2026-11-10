@@ -31,3 +31,13 @@ test('streak continues across month and DST boundaries', () => {
   expect(recordActivity({ current: 2, best: 2, lastDay: '2026-10-31' }, '2026-11-01').current).toBe(3);
   expect(recordActivity({ current: 2, best: 2, lastDay: '2026-03-28' }, '2026-03-29').current).toBe(3);
 });
+
+import { displayStreak } from '../../src/core/streak';
+
+test('the displayed streak drops to 0 once a day has been missed, before any new activity', () => {
+  const s: Streak = { current: 7, best: 7, lastDay: '2026-11-07' };
+  expect(displayStreak(s, '2026-11-08')).toBe(7); // still alive: today not done yet
+  expect(displayStreak(s, '2026-11-07')).toBe(7);
+  expect(displayStreak(s, '2026-11-10')).toBe(0);
+  expect(displayStreak({ current: 0, best: 0, lastDay: null }, '2026-11-10')).toBe(0);
+});
