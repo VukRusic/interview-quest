@@ -442,3 +442,125 @@
     font-size: 0.7rem;
   }
 }
+
+/* Python */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+.editor {
+  border: var(--px) solid var(--ink);
+  box-shadow: var(--pixel-shadow);
+  background: var(--surface);
+  font-size: 0.85rem;
+}
+.editor .cm-editor {
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 160px;
+}
+.editor .cm-content,
+.editor .cm-gutters {
+  font-family: var(--font-code);
+}
+.editor .cm-gutters {
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  border-right: var(--px) solid var(--line);
+}
+.editor .cm-cursor {
+  border-left-color: var(--ink);
+}
+.editor .cm-focused {
+  outline: none;
+}
+.editor .cm-selectionBackground,
+.editor .cm-focused .cm-selectionBackground {
+  background: var(--pine-soft) !important;
+}
+.run-msg {
+  padding: var(--space-3);
+  border: var(--px) solid var(--sun);
+  background: var(--sun-soft);
+  white-space: pre-wrap;
+  font-family: var(--font-body);
+  margin: 0;
+}
+.run-msg.is-right {
+  border-color: var(--good);
+  background: var(--good-soft);
+}
+.test-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-3) 0 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.test-list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  border: var(--px) solid var(--line);
+  overflow-wrap: anywhere;
+}
+.test-list .mark {
+  font-weight: 700;
+}
+.test-list .is-right .mark {
+  color: var(--good);
+}
+.test-list .is-wrong .mark {
+  color: var(--bad);
+}
+.test-list dl {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 var(--space-3);
+  margin: 0;
+  font-size: 0.9rem;
+}
+.test-list dt {
+  color: var(--ink-soft);
+}
+.test-list dd {
+  margin: 0;
+}
+.walkthrough {
+  border-top: var(--px) dashed var(--line);
+  padding-top: var(--space-4);
+}
+.walkthrough > * + * {
+  margin-top: var(--space-3);
+}
+.code-line.is-current {
+  background: var(--sun-soft);
+  box-shadow: inset 4px 0 0 var(--sun);
+}
+div.code-line {
+  cursor: default;
+}
+.vars {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+}
+.vars th,
+.vars td {
+  text-align: left;
+  padding: var(--space-1) var(--space-3);
+  border: 2px solid var(--line);
+}
+.vars th {
+  background: var(--surface-2);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+.walk-note {
+  font-weight: 700;
+}

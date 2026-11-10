@@ -10,9 +10,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@codemirror/lang-python": "^6.2.1",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource/atkinson-hyperlegible": "^5.3.0",
     "@fontsource/pixelify-sans": "^5.3.0",
+    "@uiw/react-codemirror": "^4.25.12",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
