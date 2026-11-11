@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent } from 'react';
 import { exportProgress, importProgress, type Progress } from '../state/progress';
 import { useProgress } from '../state/useProgress';
+import { backupStatus, describeLastBackup } from '../state/backup';
 import { applyTheme, readTheme, type Theme } from './theme';
 
 export function SettingsScreen() {
@@ -11,7 +12,8 @@ export function SettingsScreen() {
   const [theme, setTheme] = useState<Theme>(readTheme);
 
   function download() {
-    const blob = new Blob([exportProgress(progress)], { type: 'application/json' });
+    const exported = { ...progress, lastExport: today };
+    const blob = new Blob([exportProgress(exported)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -20,6 +22,7 @@ export function SettingsScreen() {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 0);
+    dispatch({ type: 'markExported', today });
     setMessage('Progress exported.');
   }
 
@@ -52,6 +55,7 @@ export function SettingsScreen() {
           Progress lives only in this browser. Export a file to keep a backup or to move to another device. The file
           includes your private stories.
         </p>
+        <p className="muted">{describeLastBackup(backupStatus(progress, today))}</p>
         <div className="row">
           <button type="button" className="btn btn-primary" onClick={download}>
             Export progress

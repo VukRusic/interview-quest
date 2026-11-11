@@ -3,6 +3,7 @@ import { indexItems, UNITS } from '../content/index';
 import type { Lesson, Unit } from '../content/types';
 import { buildSession } from '../core/session';
 import { displayStreak } from '../core/streak';
+import { backupStatus } from '../state/backup';
 import { useProgress } from '../state/useProgress';
 import { PILLAR_LABELS } from './labels';
 import { ReadinessMap } from './ReadinessMap';
@@ -59,6 +60,16 @@ export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
           </div>
         </div>
       </header>
+
+      {backupStatus(progress, today).remind && (
+        <Link to="/settings" className="backup-nudge">
+          <Sprite name="scroll" size={3} />
+          <span>
+            <strong>Back up your progress</strong>
+            <span className="muted small"> Progress lives only in this browser. Export a file to keep it safe.</span>
+          </span>
+        </Link>
+      )}
 
       {unitDone ? (
         <div className="unit-done">

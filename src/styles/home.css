@@ -266,3 +266,16 @@ a.trail-link:hover {
 .review-empty > * + * {
   margin-top: var(--space-3);
 }
+.backup-nudge {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border: var(--px) dashed var(--sun);
+  background: var(--sun-soft);
+  color: var(--ink);
+  text-decoration: none;
+}
+.backup-nudge strong {
+  display: block;
+}

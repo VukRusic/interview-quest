@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { MockStep as Mock } from '../../content/types';
 import { useProgress } from '../../state/useProgress';
 import type { StepProps } from './types';
+import { CopyForReview } from './CopyForReview';
+import { mockReviewPrompt } from '../reviewPrompt';
 
 const marker = (q: string) => `\n\n### ${q}\n`;
 
@@ -69,6 +71,7 @@ export function MockStep({ step, onDone }: StepProps<Mock>) {
           Grade my answer
         </button>
       )}
+      <CopyForReview getText={() => mockReviewPrompt(step, join(parts, step.followUps, revealed))} />
       {grading && (
         <fieldset className="rubric">
           <legend>Did your answer cover these?</legend>

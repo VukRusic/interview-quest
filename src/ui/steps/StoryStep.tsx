@@ -3,6 +3,8 @@ import type { StoryStep as Story } from '../../content/types';
 import { useProgress } from '../../state/useProgress';
 import type { StepProps } from './types';
 import { emptyStar, StoryEditor, wordCount } from './StoryEditor';
+import { CopyForReview } from './CopyForReview';
+import { storyReviewPrompt } from '../reviewPrompt';
 
 const MAX_WORDS = 300; // about two minutes spoken
 
@@ -28,6 +30,7 @@ export function StoryStep({ step, onDone }: StepProps<Story>) {
       <p className={`word-count ${words > MAX_WORDS ? 'is-over' : ''}`} aria-live="polite">
         {words} words {words > MAX_WORDS ? `(over ${MAX_WORDS}: trim it to stay under 2 minutes)` : `of ${MAX_WORDS}`}
       </p>
+      <CopyForReview getText={() => storyReviewPrompt(step, progress.stories[step.id] ?? emptyStar())} />
       <fieldset className="rubric">
         <legend>Self-check</legend>
         <label className="choice">

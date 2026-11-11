@@ -16,6 +16,8 @@ export type Progress = {
   streak: Streak;
   stories: Record<string, Star>;
   mockAnswers: Record<string, string>;
+  /** Day of the last export; drives the backup reminder. */
+  lastExport?: DayKey;
 };
 
 const DayKeySchema = z.string().refine(isDayKey, 'expected a YYYY-MM-DD date');
@@ -41,6 +43,7 @@ export const ProgressSchema = z.object({
   }),
   stories: z.record(z.string(), StarSchema),
   mockAnswers: z.record(z.string(), z.string()),
+  lastExport: DayKeySchema.optional(),
 });
 
 export function emptyProgress(): Progress {
@@ -84,6 +87,8 @@ function salvage(data: unknown): Progress {
     for (const [k, v] of Object.entries(rec)) if (schema.safeParse(v).success) kept[k] = v;
     (p as Record<string, unknown>)[field] = kept;
   }
+  const lastExport = DayKeySchema.safeParse(d.lastExport);
+  if (lastExport.success) p.lastExport = lastExport.data;
   const streak = ProgressSchema.shape.streak.safeParse(d.streak);
   if (streak.success) p.streak = streak.data;
   return p;
@@ -171,6 +176,7 @@ export type Action =
   | { type: 'completeLesson'; lessonId: string; today: DayKey }
   | { type: 'saveStory'; id: string; star: Star }
   | { type: 'saveMockAnswer'; id: string; text: string }
+  | { type: 'markExported'; today: DayKey }
   | { type: 'replace'; progress: Progress };
 
 const clamp01 = (n: number) => (Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0);
@@ -199,6 +205,8 @@ export function progressReducer(p: Progress, a: Action): Progress {
       return { ...p, stories: { ...p.stories, [a.id]: a.star } };
     case 'saveMockAnswer':
       return { ...p, mockAnswers: { ...p.mockAnswers, [a.id]: a.text } };
+    case 'markExported':
+      return { ...p, lastExport: a.today };
     case 'replace':
       return a.progress;
   }

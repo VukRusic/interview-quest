@@ -9,6 +9,7 @@ import {
   type ImportResult,
   type Progress,
 } from './progress';
+import { requestPersistentStorage } from './backup';
 
 type Ctx = {
   progress: Progress;
@@ -72,6 +73,16 @@ export function ProgressProvider({
     }
     saveProgress(progress, storage);
   }, [progress, storage]);
+
+  // Once there is real progress, ask the browser to keep storage around (silent in Safari/Chrome).
+  const asked = useRef(false);
+  const hasCompleted = Object.keys(progress.completed).length > 0;
+  useEffect(() => {
+    if (hasCompleted && !asked.current) {
+      asked.current = true;
+      void requestPersistentStorage();
+    }
+  }, [hasCompleted]);
 
   const importJson = useCallback((json: string) => {
     const r = importProgress(json);
