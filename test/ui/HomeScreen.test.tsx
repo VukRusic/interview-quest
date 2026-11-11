@@ -49,3 +49,34 @@ test('self-graded topics are labelled as self-graded, never as learned', async (
   expect(row).toHaveTextContent('self-graded');
   expect(row).not.toHaveTextContent(/learned/);
 });
+
+describe('streak hint says whether today is done yet', () => {
+  async function homeWith(streak: { current: number; best: number; lastDay: string | null }, today: string) {
+    const { memoryStorage } = await import('./helpers');
+    const { saveProgress, emptyProgress } = await import('../../src/state/progress');
+    const storage = memoryStorage();
+    saveProgress({ ...emptyProgress(), streak }, storage);
+    render(
+      <Wrap storage={storage} today={today}>
+        <HomeScreen units={[unit]} />
+      </Wrap>,
+    );
+  }
+
+  test('streak alive but today not done → says how to extend it', async () => {
+    await homeWith({ current: 1, best: 1, lastDay: '2026-11-10' }, '2026-11-11');
+    expect(screen.getByText('1 day streak')).toBeInTheDocument();
+    expect(screen.getByText('Do one card or lesson today to make it 2.')).toBeInTheDocument();
+  });
+
+  test('today already done → says so', async () => {
+    await homeWith({ current: 2, best: 2, lastDay: '2026-11-11' }, '2026-11-11');
+    expect(screen.getByText('Done for today.')).toBeInTheDocument();
+  });
+
+  test('streak broken or never started → invites a fresh start', async () => {
+    await homeWith({ current: 5, best: 5, lastDay: '2026-11-01' }, '2026-11-11');
+    expect(screen.getByText('0 day streak')).toBeInTheDocument();
+    expect(screen.getByText('Do one card or lesson today to start a streak.')).toBeInTheDocument();
+  });
+});

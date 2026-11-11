@@ -20,6 +20,13 @@ export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
   const inSession = new Set([session.lesson, session.practice, ...session.extras].filter(Boolean));
   const unitDone = !session.lesson && !session.practice;
   const s = progress.streak;
+  const shown = displayStreak(s, today);
+  const streakHint =
+    s.lastDay === today
+      ? 'Done for today.'
+      : shown > 0
+        ? `Do one card or lesson today to make it ${shown + 1}.`
+        : 'Do one card or lesson today to start a streak.';
 
   const card = (slot: Lesson['slot'], id?: string) => {
     const l = id ? byId.get(id) : undefined;
@@ -46,7 +53,8 @@ export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
         <div className="streak">
           <Sprite name="flame" size={4} />
           <div>
-            <div className="streak-n">{displayStreak(s, today)} day streak</div>
+            <div className="streak-n">{shown} day streak</div>
+            <div className="muted small">{streakHint}</div>
             <div className="muted small">Best: {s.best}</div>
           </div>
         </div>
