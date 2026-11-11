@@ -192,3 +192,35 @@ describe('today stays current while the app is open', () => {
     expect(result.current.today).toBe('2026-11-10');
   });
 });
+
+describe('more than one tab', () => {
+  test('a change saved by another tab is picked up instead of being overwritten', () => {
+    const s = fakeStorage();
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <ProgressProvider storage={s} today="2026-11-10">
+        {children}
+      </ProgressProvider>
+    );
+    const { result } = renderHook(() => useProgress(), { wrapper });
+    // Another tab writes a story.
+    const other = progressReducer(emptyProgress(), { type: 'saveStory', id: 's1', star: { situation: 'S', task: 'T', action: 'A', result: 'R' } });
+    saveProgress(other, s);
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY }));
+    });
+    expect(result.current.progress.stories.s1?.situation).toBe('S');
+    // This tab then answers; the story must survive.
+    act(() => result.current.dispatch({ type: 'answer', itemId: 'q', correct: true, today: '2026-11-10' }));
+    expect(loadProgress(s).stories.s1?.situation).toBe('S');
+  });
+});
+
+test('a rejected load that runs twice (React StrictMode) keeps a single backup copy', async () => {
+  const { loadProgressDetailed, BACKUP_PREFIX } = await import('../../src/state/progress');
+  const s = fakeStorage({ [STORAGE_KEY]: '{"version":1,"srs":5}' });
+  const a = loadProgressDetailed(s, '2026-11-10');
+  const b = loadProgressDetailed(s, '2026-11-10');
+  expect(b.backupKey).toBe(a.backupKey);
+  const backups = Array.from({ length: s.length }, (_, i) => s.key(i)).filter((k) => k?.startsWith(BACKUP_PREFIX));
+  expect(backups).toHaveLength(1);
+});

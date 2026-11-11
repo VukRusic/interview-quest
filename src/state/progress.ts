@@ -122,6 +122,11 @@ export function loadProgressDetailed(
   let backupKey: string | null = null;
   try {
     if (storage) {
+      // Loading can run twice (React StrictMode); reuse a backup that already holds this exact text.
+      for (let i = 0; i < storage.length; i++) {
+        const k = storage.key(i);
+        if (k?.startsWith(BACKUP_PREFIX) && storage.getItem(k) === raw) return { progress: salvage(data), backupKey: k };
+      }
       let key = `${BACKUP_PREFIX}${today}`;
       for (let n = 2; storage.getItem(key) !== null; n++) key = `${BACKUP_PREFIX}${today}-${n}`;
       storage.setItem(key, raw);

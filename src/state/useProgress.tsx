@@ -8,6 +8,7 @@ import {
   type Action,
   type ImportResult,
   type Progress,
+  STORAGE_KEY,
 } from './progress';
 import { requestPersistentStorage } from './backup';
 
@@ -83,6 +84,16 @@ export function ProgressProvider({
       void requestPersistentStorage();
     }
   }, [hasCompleted]);
+
+  // Another tab saved: adopt its progress so this tab's next save doesn't overwrite it.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY && e.key !== null) return;
+      dispatch({ type: 'replace', progress: loadProgressDetailed(storage, today).progress });
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [storage, today]);
 
   const importJson = useCallback((json: string) => {
     const r = importProgress(json);

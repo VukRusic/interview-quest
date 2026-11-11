@@ -25,7 +25,7 @@ function getWorker(): Worker {
     w.onerror = (e) => {
       e.preventDefault();
       const message = e.message || 'The Python worker crashed.';
-      for (const [id, handle] of handlers) handle({ id, ok: false, message });
+      for (const [id, handle] of [...handlers]) handle({ id, ok: false, message });
       kill(w);
     };
     worker = w;
@@ -33,9 +33,11 @@ function getWorker(): Worker {
   return worker;
 }
 
+/** Stop the worker and settle every run still waiting on it, so none can hang. */
 function kill(w: Worker) {
   w.terminate();
   if (worker === w) worker = null;
+  for (const [id, handle] of [...handlers]) handle({ id, ok: false, message: 'Python was restarted. Run your code again.' });
 }
 
 /** Python traceback text → its last lines (e.g. "SyntaxError: invalid syntax"). */
