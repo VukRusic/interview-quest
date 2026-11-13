@@ -1,4 +1,4 @@
-import { buildSession } from '../../src/core/session';
+import { buildSession, lessonAccess } from '../../src/core/session';
 import { emptyProgress, type Progress } from '../../src/state/progress';
 import { UnitSchema, type Unit } from '../../src/content/types';
 
@@ -20,20 +20,55 @@ const T = '2026-11-10';
 
 const withCompleted = (completed: Record<string, string>): Progress => ({ ...emptyProgress(), completed });
 
-test('fresh progress: first lesson, first practice, both extras, no review', () => {
-  expect(buildSession([unit], emptyProgress(), T)).toEqual({ review: [], lesson: 'l1', practice: 'p1', extras: ['x1', 'x2'] });
+const Y = '2026-11-09';
+const unitB: Unit = UnitSchema.parse({ id: 'u2', title: 'U2', lessons: [lesson('b1', 'lesson'), lesson('b2', 'practice')] });
+
+test('fresh progress offers the first two lessons in trail order, whatever their slot', () => {
+  expect(buildSession([unit], emptyProgress(), T)).toEqual({ review: [], resolve: undefined, lessons: ['l1', 'p1'], held: false, allDone: false });
 });
 
-test('lesson 1 completed yesterday → lesson 2', () => {
-  expect(buildSession([unit], withCompleted({ l1: '2026-11-09' }), T).lesson).toBe('l2');
+test('one finished today: it stays, plus the next one; not held', () => {
+  const s = buildSession([unit], withCompleted({ l1: T }), T);
+  expect(s.lessons).toEqual(['l1', 'p1']);
+  expect(s.held).toBe(false);
 });
 
-test('lesson 1 completed today stays as today’s lesson', () => {
-  expect(buildSession([unit], withCompleted({ l1: T }), T).lesson).toBe('l1');
+test('two finished today: both stay, nothing new, held', () => {
+  const s = buildSession([unit], withCompleted({ l1: T, p1: T }), T);
+  expect(s.lessons).toEqual(['l1', 'p1']);
+  expect(s.held).toBe(true);
 });
 
-test('extras completed before today drop out; ones done today stay', () => {
-  expect(buildSession([unit], withCompleted({ x1: '2026-11-09', x2: T }), T).extras).toEqual(['x2']);
+test('three finished today (imported progress): all three stay, nothing new, held', () => {
+  const s = buildSession([unit], withCompleted({ l1: T, p1: T, l2: T }), T);
+  expect(s.lessons).toEqual(['l1', 'p1', 'l2']);
+  expect(s.held).toBe(true);
+});
+
+test('the next day the next two open again', () => {
+  const s = buildSession([unit], withCompleted({ l1: Y, p1: Y }), T);
+  expect(s.lessons).toEqual(['l2', 'x1']);
+  expect(s.held).toBe(false);
+});
+
+test('lessons finished on earlier days are not in today’s list', () => {
+  expect(buildSession([unit], withCompleted({ l1: Y }), T).lessons).toEqual(['p1', 'l2']);
+});
+
+test('a lesson finished out of order today still counts toward the two', () => {
+  expect(buildSession([unit], withCompleted({ l2: T }), T).lessons).toEqual(['l1', 'l2']);
+});
+
+test('the session crosses a unit boundary', () => {
+  const p = withCompleted({ l1: Y, p1: Y, l2: Y, x1: Y });
+  expect(buildSession([unit, unitB], p, T).lessons).toEqual(['x2', 'b1']);
+});
+
+test('Milestone 1 progress: seven lessons done earlier → the last one is today’s first lesson', () => {
+  const p = withCompleted({ l1: '2026-11-12', p1: '2026-11-12', l2: '2026-11-12', x1: '2026-11-13' });
+  const s = buildSession([unit, unitB], p, '2026-11-14');
+  expect(s.lessons).toEqual(['x2', 'b1']);
+  expect(s.held).toBe(false);
 });
 
 test('review holds due reviewable items only, not unknown ids or self-graded ones', () => {
@@ -63,12 +98,28 @@ test('review is capped at 15, most overdue first, after dropping stale ids', () 
   expect(r).not.toContain('gone');
 });
 
-test('all done → lesson and practice undefined', () => {
+test('everything finished earlier: no lessons, not held, allDone', () => {
   const all = withCompleted({ l1: '2026-11-01', p1: '2026-11-01', l2: '2026-11-02', x1: '2026-11-02', x2: '2026-11-02' });
-  const s = buildSession([unit], all, T);
-  expect(s.lesson).toBeUndefined();
-  expect(s.practice).toBeUndefined();
-  expect(s.extras).toEqual([]);
+  expect(buildSession([unit], all, T)).toMatchObject({ lessons: [], held: false, allDone: true });
+});
+
+test('the last two finished today: they stay listed, not held (nothing is waiting), allDone', () => {
+  const all = withCompleted({ l1: Y, p1: Y, l2: Y, x1: T, x2: T });
+  expect(buildSession([unit], all, T)).toMatchObject({ lessons: ['x1', 'x2'], held: false, allDone: true });
+});
+
+test('lessonAccess: done / today / tomorrow / later', () => {
+  const open = withCompleted({ l1: Y });
+  const s1 = buildSession([unit], open, T);
+  expect(lessonAccess(s1, open, 'l1')).toBe('done');
+  expect(lessonAccess(s1, open, 'p1')).toBe('today');
+  expect(lessonAccess(s1, open, 'l2')).toBe('today');
+  expect(lessonAccess(s1, open, 'x1')).toBe('later');
+  const full = withCompleted({ l1: T, p1: T });
+  const s2 = buildSession([unit], full, T);
+  expect(lessonAccess(s2, full, 'l1')).toBe('done');
+  expect(lessonAccess(s2, full, 'l2')).toBe('tomorrow');
+  expect(lessonAccess(s2, full, 'x2')).toBe('tomorrow');
 });
 
 describe('re-solve: full problems come back occasionally', () => {
