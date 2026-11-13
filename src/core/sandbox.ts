@@ -5,7 +5,8 @@ export const KINDS: ComponentKind[] = ['cdn', 'lb', 'app', 'cache', 'queue', 'db
 
 /** Count per kind; app ≥ 1, db = 1. */
 export type Architecture = Record<ComponentKind, number>;
-export type Load = { rps: number; readRatio: number; staticRatio: number; dbDown?: boolean };
+/** `appDown` = how many app servers are down. */
+export type Load = { rps: number; readRatio: number; staticRatio: number; dbDown?: boolean; appDown?: number };
 export type Tier = { kind: ComponentKind; load: number; capacity: number };
 export type Metrics = {
   p95Ms: number;
@@ -42,7 +43,14 @@ const latency = (kind: ComponentKind, u: number) => COMPONENTS[kind].baseMs / Ma
  * Capacity/latency model with illustrative numbers (not benchmarks). Static requests go to the CDN
  * if there is one, otherwise to the app. Dynamic reads pass the cache (80% hits), then spread over
  * the primary and its replicas; writes go to the primary, smoothed by a queue if present.
+ * App servers beyond the first only receive traffic behind a load balancer, which also routes
+ * around servers that are down.
  */
+export function servingApps(arch: Architecture, load: Pick<Load, 'appDown'>): number {
+  const reachable = arch.lb > 0 ? arch.app : Math.min(arch.app, 1);
+  return Math.max(0, reachable - Math.max(0, load.appDown ?? 0));
+}
+
 export function simulate(arch: Architecture, load: Load): Metrics {
   const rps = Math.max(0, load.rps);
   const staticRps = rps * load.staticRatio;
@@ -55,7 +63,8 @@ export function simulate(arch: Architecture, load: Load): Metrics {
   const dbCap = COMPONENTS.db.capacityRps * arch.db;
   const writesToDb = arch.queue > 0 ? Math.min(writes, dbCap * QUEUE_DRAIN) : writes;
 
-  let failed = 0;
+  const apps = servingApps(arch, load);
+  let failed = apps === 0 ? appLoad : 0;
   let primaryLoad: number;
   let replicaLoad: number;
   if (load.dbDown) {
@@ -79,7 +88,7 @@ export function simulate(arch: Architecture, load: Load): Metrics {
   };
   add('cdn', staticRps);
   add('lb', appLoad);
-  add('app', appLoad);
+  if (arch.app > 0) tiers.push({ kind: 'app', load: appLoad, capacity: COMPONENTS.app.capacityRps * apps });
   add('cache', readsTotal);
   add('queue', writes);
   if (!load.dbDown) add('db', primaryLoad);
