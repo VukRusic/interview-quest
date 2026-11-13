@@ -123,3 +123,44 @@ describe('tech talk decks', () => {
       expect(new Set(cards(id).map((c) => c.answer)).size, id).toBeGreaterThanOrEqual(3);
   });
 });
+
+describe('AI lesson, mock interview and story', () => {
+  test('ai-tokens opens with a visual and has five questions', () => {
+    const steps = lesson('ai-tokens').steps;
+    const first = steps[0];
+    expect(first.kind === 'explain' && first.visual).toBe('token-window');
+    const quiz = steps.filter((s) => s.kind === 'quiz');
+    expect(quiz).toHaveLength(5);
+    for (const q of quiz) expect(q.kind === 'quiz' && q.id.startsWith('ai-tok-') && q.topic === 'ai-tokens').toBe(true);
+  });
+
+  test('ai-tokens names no prices, model ids or window sizes that would go stale', () => {
+    expect(JSON.stringify(lesson('ai-tokens'))).not.toMatch(/\$\d|claude-|\d+k tokens|\d{3},\d{3}|opus|sonnet|haiku|gpt/i);
+  });
+
+  test('the notification mock has five follow-ups and a rubric of six to eight lines', () => {
+    const steps = lesson('mock-notifications').steps;
+    expect(steps).toHaveLength(1);
+    const m = steps[0];
+    expect(m.kind === 'mock' && m.id).toBe('mock-notify');
+    if (m.kind !== 'mock') return;
+    expect(m.topic).toBe('design-notifications');
+    expect(m.followUps).toHaveLength(5);
+    expect(m.rubric.length).toBeGreaterThanOrEqual(6);
+    expect(m.rubric.length).toBeLessThanOrEqual(8);
+    expect(m.rubric.join(' ')).toMatch(/queue/i);
+    expect(m.rubric.join(' ')).toMatch(/idempotency/i);
+  });
+
+  test('the incident story has a prompt and at least three generic hints', () => {
+    const s = lesson('story-production-incident').steps[0];
+    expect(s.kind === 'story' && s.id).toBe('story-incident');
+    if (s.kind !== 'story') return;
+    expect(s.topic).toBe('behavioural');
+    expect(s.hints.length).toBeGreaterThanOrEqual(3);
+  });
+
+  test('no lesson is still a placeholder', () => {
+    expect(text).not.toMatch(/coming soon/i);
+  });
+});

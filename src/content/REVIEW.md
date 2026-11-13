@@ -122,3 +122,19 @@ Same rules as Unit 1. Visuals use illustrative numbers; check that what they *te
 - [ ] `tt-breaker-half-open`
 - [ ] `tt-token-bucket`
 - [ ] `tt-bulkhead`
+
+## ai-tokens (lesson, ai)
+Checked against Anthropic's API reference on 2026-11-13. Kept to what holds across models: no prices, model names or window sizes.
+- [ ] explain: "What a model actually receives" (+ TokenWindow visual, illustrative counts)
+- [ ] explain: "What it costs, and how to spend less" (output priced higher than input; reasoning billed as output; caching matches from the start)
+- [ ] `ai-tok-what`
+- [ ] `ai-tok-resend`
+- [ ] `ai-tok-output-cost`
+- [ ] `ai-tok-cache`
+- [ ] `ai-tok-budget`
+
+## mock-notifications (extra, design)
+- [ ] `mock-notify` (prompt, 5 follow-ups, 8 rubric items)
+
+## story-production-incident (extra, stories)
+- [ ] `story-incident` (prompt and hints only; the owner's answers live in the browser, never here)

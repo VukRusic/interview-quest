@@ -895,3 +895,27 @@ h1 .sprite {
     grid-template-columns: 1fr;
   }
 }
+
+.tok-bar {
+  display: flex;
+  height: 22px;
+  border: 2px solid var(--ink);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.tok-seg {
+  display: block;
+  height: 100%;
+}
+.tok-instructions {
+  background: var(--ink-soft);
+}
+.tok-document {
+  background: var(--pine);
+}
+.tok-history {
+  background: var(--sun);
+}
+.tok-reply {
+  background: var(--bad);
+}

@@ -87,3 +87,32 @@ describe('sliding-window', () => {
     expect(screen.getByTestId('window-best')).toHaveTextContent('9');
   });
 });
+
+describe('token-window', () => {
+  const num = (label: string) => Number(stat(label));
+
+  test('every turn resends the whole conversation, so the total sent grows faster than the conversation', async () => {
+    show('token-window');
+    const first = num('Sent with this request');
+    await userEvent.click(screen.getByRole('button', { name: 'Add a turn' }));
+    const second = num('Sent with this request');
+    expect(second).toBeGreaterThan(first);
+    expect(num('Sent in total so far')).toBe(first + second);
+  });
+
+  test('attaching a document makes every later request bigger', async () => {
+    show('token-window');
+    const before = num('Sent with this request');
+    await userEvent.click(screen.getByRole('checkbox', { name: /document/i }));
+    expect(num('Sent with this request')).toBeGreaterThan(before);
+  });
+
+  test('when the window is full it says so and stops adding turns', async () => {
+    show('token-window');
+    await userEvent.click(screen.getByRole('checkbox', { name: /document/i }));
+    const add = screen.getByRole('button', { name: 'Add a turn' });
+    for (let i = 0; i < 12 && !add.hasAttribute('disabled'); i++) await userEvent.click(add);
+    expect(add).toBeDisabled();
+    expect(screen.getByText(/no longer fits/i)).toBeInTheDocument();
+  });
+});

@@ -5,6 +5,7 @@ import { LoadBalancer } from './LoadBalancer';
 import { QueueBuffer } from './QueueBuffer';
 import { RetryStorm } from './RetryStorm';
 import { SlidingWindow } from './SlidingWindow';
+import { TokenWindow } from './TokenWindow';
 import { TwoPointers } from './TwoPointers';
 
 export const VISUALS: Record<string, FC> = {
@@ -15,4 +16,5 @@ export const VISUALS: Record<string, FC> = {
   'queue-buffer': QueueBuffer,
   'retry-storm': RetryStorm,
   'sliding-window': SlidingWindow,
+  'token-window': TokenWindow,
 };
