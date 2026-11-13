@@ -80,3 +80,28 @@ describe('streak hint says whether today is done yet', () => {
     expect(screen.getByText('Do one card or lesson today to start a streak.')).toBeInTheDocument();
   });
 });
+
+test('a topic answered today shows a practised fill and says so, with 0% proven', async () => {
+  const { memoryStorage } = await import('./helpers');
+  const { saveProgress, emptyProgress } = await import('../../src/state/progress');
+  const five = UnitSchema.parse({
+    id: 'u5',
+    title: 'Five',
+    lessons: [{ id: 'l', title: 'L', pillar: 'design', slot: 'lesson', steps: ['c1', 'c2', 'c3', 'c4', 'c5'].map((id) => quiz(id)) }],
+  });
+  const storage = memoryStorage();
+  saveProgress(
+    { ...emptyProgress(), srs: { c1: { id: 'c1', box: 0, due: '2026-11-11', lastAnswered: '2026-11-10' } } },
+    storage,
+  );
+  render(
+    <Wrap storage={storage}>
+      <HomeScreen units={[five]} />
+    </Wrap>,
+  );
+  const meter = screen.getByRole('meter', { name: 'Caching' });
+  expect(meter).toHaveAttribute('aria-valuenow', '0');
+  const fill = meter.querySelector('.rd-practised') as HTMLElement;
+  expect(fill.style.width).toBe('20%');
+  expect(meter.closest('li')!).toHaveTextContent('1 of 5 practised');
+});

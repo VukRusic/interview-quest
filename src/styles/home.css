@@ -227,10 +227,18 @@ a.trail-link:hover {
   /* pixel tick marks every 25% */
   background-image: repeating-linear-gradient(90deg, transparent 0 calc(25% - 2px), var(--line) calc(25% - 2px) 25%);
 }
+.rd-bar {
+  position: relative;
+}
 .rd-bar > span {
-  display: block;
-  height: 100%;
+  position: absolute;
+  inset: 0 auto 0 0;
   background: var(--sun);
+}
+/* practised but not yet proven: same colour, hatched and faint */
+.rd-bar > .rd-practised {
+  opacity: 0.35;
+  background-image: repeating-linear-gradient(135deg, transparent 0 3px, var(--surface-2) 3px 5px);
 }
 .rd-status {
   font-size: 0.82rem;
