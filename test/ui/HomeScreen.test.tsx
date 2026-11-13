@@ -24,7 +24,8 @@ test('fresh progress: first lesson is next and the streak reads 0 days', () => {
   const path = screen.getByRole('list', { name: /unit path/i });
   const next = within(path).getByText('Next').closest('li')!;
   expect(next).toHaveTextContent('The answer flow');
-  expect(within(path).getByText('Caching').closest('li')).toHaveTextContent(/locked/i);
+  expect(within(path).getByText('Slow page').closest('li')).toHaveTextContent('Today');
+  expect(within(path).getByText('Caching').closest('li')).toHaveTextContent('Later');
 });
 
 test('self-graded topics are labelled as self-graded, never as learned', async () => {
@@ -104,4 +105,53 @@ test('a topic answered today shows a practised fill and says so, with 0% proven'
   const fill = meter.querySelector('.rd-practised') as HTMLElement;
   expect(fill.style.width).toBe('20%');
   expect(meter.closest('li')!).toHaveTextContent('1 of 5 practised');
+});
+
+describe('two new lessons a day', () => {
+  async function home(completed: Record<string, string>, today = '2026-11-10') {
+    const { memoryStorage } = await import('./helpers');
+    const { saveProgress, emptyProgress } = await import('../../src/state/progress');
+    const storage = memoryStorage();
+    saveProgress({ ...emptyProgress(), completed }, storage);
+    render(
+      <Wrap storage={storage} today={today}>
+        <HomeScreen units={[unit]} />
+      </Wrap>,
+    );
+    return { session: screen.getByRole('list', { name: /today's session/i }), path: screen.getByRole('list', { name: /unit path/i }) };
+  }
+
+  test('fresh progress: two lesson cards in today’s session, no held note', async () => {
+    const { session } = await home({});
+    expect(within(session).getByRole('link', { name: /The answer flow/ })).toBeInTheDocument();
+    expect(within(session).getByRole('link', { name: /Slow page/ })).toBeInTheDocument();
+    expect(within(session).queryByText('Caching')).toBeNull();
+    expect(screen.queryByText(/today's two new lessons/i)).toBeNull();
+  });
+
+  test('two finished today: held note, the next trail step reads Tomorrow and is not a link', async () => {
+    const { path } = await home({ l1: '2026-11-10', p1: '2026-11-10' });
+    expect(
+      screen.getByText("That's today's two new lessons. The next one opens tomorrow. Reviews and finished lessons stay open."),
+    ).toBeInTheDocument();
+    const held = within(path).getByText('Caching').closest('li')!;
+    expect(held).toHaveTextContent('Tomorrow');
+    expect(within(held).queryByRole('link')).toBeNull();
+  });
+
+  test('finished lessons stay links when held', async () => {
+    const { path } = await home({ l1: '2026-11-10', p1: '2026-11-10' });
+    expect(within(path).getByRole('link', { name: /The answer flow/ })).toHaveAttribute('href', '/lesson/l1');
+  });
+
+  test('everything finished: the unit-complete message shows, with no held note', async () => {
+    await home({ l1: '2026-11-08', p1: '2026-11-09', l2: '2026-11-09' });
+    expect(screen.getByRole('heading', { name: 'Unit complete' })).toBeInTheDocument();
+    expect(screen.queryByText(/today's two new lessons/i)).toBeNull();
+  });
+
+  test('lessons still waiting: no unit-complete message', async () => {
+    await home({ l1: '2026-11-10', p1: '2026-11-10' });
+    expect(screen.queryByRole('heading', { name: 'Unit complete' })).toBeNull();
+  });
 });
