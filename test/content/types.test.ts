@@ -1,5 +1,5 @@
 import { validateContent, indexItems } from '../../src/content/index';
-import { UnitSchema, type Unit } from '../../src/content/types';
+import { PillarSchema, QuizStepSchema, UnitSchema, type Unit } from '../../src/content/types';
 
 function unitWith(steps: unknown[]): Unit {
   return UnitSchema.parse({
@@ -60,4 +60,17 @@ test('indexItems maps every step with an id to its lesson', () => {
   const idx = indexItems([unitWith([{ kind: 'explain', title: 't', body: 'b' }, quiz('q1')])]);
   expect([...idx.keys()]).toEqual(['q1']);
   expect(idx.get('q1')?.lessonId).toBe('l1');
+});
+
+describe('milestone 2 schema additions', () => {
+  test('talk and ai are pillars', () => {
+    expect(PillarSchema.parse('talk')).toBe('talk');
+    expect(PillarSchema.parse('ai')).toBe('ai');
+  });
+  test('a quiz step may carry a lookUp phrase but not a URL', () => {
+    const base = { kind: 'quiz', id: 'q', topic: 't', prompt: 'p', options: ['a', 'b'], answer: 0, why: 'w' };
+    expect(QuizStepSchema.parse({ ...base, lookUp: 'consistent hashing' }).lookUp).toBe('consistent hashing');
+    expect(() => QuizStepSchema.parse({ ...base, lookUp: 'https://example.com' })).toThrow();
+    expect(() => QuizStepSchema.parse({ ...base, lookUp: 'www.example.com' })).toThrow();
+  });
 });

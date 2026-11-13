@@ -30,3 +30,16 @@ test('the right pick reports correct:true', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
   expect(onDone).toHaveBeenCalledWith({ correct: true });
 });
+
+test('shows the look-up phrase only after answering', async () => {
+  render(<QuizStep step={{ ...step, lookUp: 'consistent hashing' }} onDone={() => {}} />);
+  expect(screen.queryByText(/Look up:/)).toBeNull();
+  await userEvent.click(screen.getByRole('button', { name: /Disk space/ }));
+  expect(screen.getByText('Look up: consistent hashing')).toBeInTheDocument();
+});
+
+test('no look-up line when the step has none', async () => {
+  render(<QuizStep step={step} onDone={() => {}} />);
+  await userEvent.click(screen.getByRole('button', { name: /Disk space/ }));
+  expect(screen.queryByText(/Look up:/)).toBeNull();
+});

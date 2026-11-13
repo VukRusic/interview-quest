@@ -31,6 +31,7 @@ export function QuizStep({ step, onDone }: StepProps<Quiz>) {
       {answered && (
         <Feedback correct={correct} onContinue={() => onDone({ correct })}>
           <p>{step.why}</p>
+          {step.lookUp && <p className="muted small">Look up: {step.lookUp}</p>}
         </Feedback>
       )}
     </section>

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const PillarSchema = z.enum(['design', 'review', 'algo', 'stack', 'stories']);
+export const PillarSchema = z.enum(['design', 'review', 'algo', 'stack', 'stories', 'talk', 'ai']);
 export type Pillar = z.infer<typeof PillarSchema>;
 
 export const ExplainStepSchema = z.object({
@@ -19,6 +19,13 @@ export const QuizStepSchema = z.object({
   options: z.array(z.string()).min(2),
   answer: z.number().int(),
   why: z.string(),
+  /** A phrase to search for afterwards. Never a URL: links rot. */
+  lookUp: z
+    .string()
+    .min(2)
+    .max(80)
+    .refine((s) => !/https?:|www\./i.test(s), 'lookUp is a search phrase, not a link')
+    .optional(),
 });
 
 export const BugStepSchema = z.object({

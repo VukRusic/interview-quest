@@ -21,4 +21,6 @@ export const PILLAR_LABELS: Record<Pillar, string> = {
   algo: 'Algorithm patterns',
   stack: 'Stack',
   stories: 'Stories',
+  talk: 'Tech talk',
+  ai: 'Working with AI',
 };
