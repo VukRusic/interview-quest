@@ -828,7 +828,8 @@ h1 .sprite {
   padding: var(--space-2);
   border: 2px solid var(--ink);
   background: var(--surface-2);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  min-width: 0;
 }
 .lb-server.is-down {
   border-style: dashed;
@@ -889,11 +890,6 @@ h1 .sprite {
 .retry-tick {
   font-size: 0.72rem;
   color: var(--ink-soft);
-}
-@media (max-width: 560px) {
-  .lb-servers {
-    grid-template-columns: 1fr;
-  }
 }
 
 .tok-bar {

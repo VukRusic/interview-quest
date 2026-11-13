@@ -28,7 +28,7 @@ function TierNode({ data }: NodeProps<Node<TierData>>) {
 }
 const nodeTypes = { tier: TierNode };
 
-function buildGraph(arch: Architecture, m: Metrics, dbDown: boolean, appDown: number): { nodes: Node<TierData>[]; edges: Edge[] } {
+function buildGraph(arch: Architecture, m: Metrics, dbDown: boolean, appDown: number, narrow: boolean): { nodes: Node<TierData>[]; edges: Edge[] } {
   const order: (ComponentKind | 'users')[] = ['users', ...KINDS.filter((k) => arch[k] > 0)];
   const nodes: Node<TierData>[] = order.map((k, i) => {
     const tier = k === 'users' ? undefined : m.tiers.find((t) => t.kind === k);
@@ -36,7 +36,10 @@ function buildGraph(arch: Architecture, m: Metrics, dbDown: boolean, appDown: nu
     return {
       id: k,
       type: 'tier',
-      position: { x: i * 150, y: k === 'replica' || k === 'cdn' ? 70 : 0 },
+      // On a phone, wrap to rows of three so the labels stay readable.
+      position: narrow
+        ? { x: (i % 3) * 150, y: Math.floor(i / 3) * 100 }
+        : { x: i * 150, y: k === 'replica' || k === 'cdn' ? 70 : 0 },
       draggable: false,
       selectable: false,
       data: {
@@ -87,7 +90,8 @@ export function SandboxStep({ step, onDone }: StepProps<Sandbox>) {
   const m = all[eventIdx];
   const ev = sc.events[eventIdx];
   const solved = all.every((x) => meetsSlo(x, sc.slo));
-  const graph = buildGraph(arch, m, !!ev.load.dbDown, ev.load.appDown ?? 0);
+  const narrow = typeof window !== 'undefined' && !!window.matchMedia?.('(max-width: 560px)').matches;
+  const graph = buildGraph(arch, m, !!ev.load.dbDown, ev.load.appDown ?? 0, narrow);
   const idleApps = arch.app > 1 && arch.lb === 0;
   const noApps = servingApps(arch, ev.load) === 0;
 
@@ -106,11 +110,13 @@ export function SandboxStep({ step, onDone }: StepProps<Sandbox>) {
       <p>{sc.story}</p>
       <div className="flow-box" aria-label="Architecture diagram">
         <ReactFlow
+          key={graph.nodes.length /* refit the view when a tier is added or removed */}
           nodes={graph.nodes}
           edges={graph.edges}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.15 }}
+          fitViewOptions={{ padding: 0.08 }}
+          minZoom={0.2}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}

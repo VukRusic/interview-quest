@@ -44,8 +44,7 @@ export function ReadinessMap({ units }: { units: Unit[] }) {
               const parts: string[] = [`${autoStarted + selfDone} of ${ids.length} practised`];
               if (auto.length) {
                 if (learned === auto.length) parts.push('learned');
-                else if (autoStarted === 0) parts.push('not started');
-                else parts.push(`${learned} of ${auto.length} learned, ${autoStarted - learned} in progress`);
+                else if (autoStarted > 0) parts.push(`${learned} of ${auto.length} learned, ${autoStarted - learned} in progress`);
               }
               if (self.length) parts.push(selfDone ? `${selfDone} of ${self.length} self-graded` : 'not self-graded yet');
               const status = parts.join('; ');
