@@ -4,6 +4,7 @@ import { DesignFlow } from './DesignFlow';
 import { LoadBalancer } from './LoadBalancer';
 import { QueueBuffer } from './QueueBuffer';
 import { RetryStorm } from './RetryStorm';
+import { SlidingWindow } from './SlidingWindow';
 import { TwoPointers } from './TwoPointers';
 
 export const VISUALS: Record<string, FC> = {
@@ -13,4 +14,5 @@ export const VISUALS: Record<string, FC> = {
   'load-balancer': LoadBalancer,
   'queue-buffer': QueueBuffer,
   'retry-storm': RetryStorm,
+  'sliding-window': SlidingWindow,
 };

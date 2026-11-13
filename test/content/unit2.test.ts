@@ -62,3 +62,26 @@ describe('design lessons', () => {
       for (const s of lesson(id).steps) if (s.kind === 'quiz') expect(s.why.length, s.id).toBeGreaterThan(80);
   });
 });
+
+describe('practice lessons', () => {
+  test('flash-sale explains first, then runs the flash-sale scenario', () => {
+    const steps = lesson('flash-sale').steps;
+    expect(steps.map((s) => s.kind)).toEqual(['explain', 'sandbox']);
+    expect(steps[1]).toMatchObject({ id: 'sandbox-flash-sale', topic: 'traffic-spikes', scenarioId: 'flash-sale' });
+  });
+
+  test('sliding-window: a visual, three recognition questions, then the problem', () => {
+    const steps = lesson('sliding-window').steps;
+    const first = steps[0];
+    expect(first.kind === 'explain' && first.visual).toBe('sliding-window');
+    const quiz = steps.filter((s) => s.kind === 'quiz');
+    expect(quiz).toHaveLength(3);
+    for (const q of quiz) expect(q.kind === 'quiz' && q.id.startsWith('sw-which-')).toBe(true);
+    const p = steps[steps.length - 1];
+    expect(p.kind === 'python' && p.id).toBe('py-max-window-sum');
+    if (p.kind !== 'python') return;
+    expect(p.fn).toBe('max_window_sum');
+    expect(p.tests.length).toBeGreaterThanOrEqual(7);
+    expect(p.walkthrough.length).toBeGreaterThanOrEqual(8);
+  });
+});

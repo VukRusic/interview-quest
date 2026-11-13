@@ -69,3 +69,21 @@ describe('retry-storm', () => {
     expect(calm).toBeLessThanOrEqual(150);
   });
 });
+
+describe('sliding-window', () => {
+  test('stepping forward slides the window and updates the running sum', async () => {
+    show('sliding-window');
+    expect(screen.getByTestId('window-sum')).toHaveTextContent('8');
+    await userEvent.click(screen.getByRole('button', { name: 'Next step' }));
+    expect(screen.getByTestId('window-sum')).toHaveTextContent('7');
+    expect(screen.getByText(/add 1, subtract 2/i)).toBeInTheDocument();
+  });
+
+  test('the last step shows the best window and cannot go further', async () => {
+    show('sliding-window');
+    const next = screen.getByRole('button', { name: 'Next step' });
+    for (let i = 0; i < 3; i++) await userEvent.click(next);
+    expect(next).toBeDisabled();
+    expect(screen.getByTestId('window-best')).toHaveTextContent('9');
+  });
+});

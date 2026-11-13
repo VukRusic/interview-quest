@@ -87,3 +87,14 @@ Same rules as Unit 1. Visuals use illustrative numbers; check that what they *te
 - [ ] `res-breaker-open`
 - [ ] `bug-retry-charge` (C#: check the claim that EnsureSuccessStatusCode throws HttpRequestException on 4xx/5xx)
 - [ ] `bug-fetch-no-timeout` (TypeScript: check AbortSignal.timeout usage)
+
+## flash-sale (practice, design)
+- [ ] explain: "Before you build"
+- [ ] `sandbox-flash-sale` (scenario story, SLO, budget, lesson text in `scenarios.ts`; rule that extra app servers need a load balancer)
+
+## sliding-window (lesson, algo)
+- [ ] explain: "Reuse the work from the last step" (+ SlidingWindow visual)
+- [ ] `sw-which-fixed`
+- [ ] `sw-which-variable`
+- [ ] `sw-which-not`
+- [ ] `py-max-window-sum` (prompt, 8 tests, reference, 10 walkthrough frames)

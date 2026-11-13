@@ -70,3 +70,31 @@ exec(open(sys.argv[2]).read(), {})
   const last = out.trim().split('\n').pop()!;
   expect(JSON.parse(last)).toEqual({ results: [{ ok: true, got: '4', error: null }] });
 });
+
+describe('every reference solution passes its own tests under CPython', async () => {
+  const { UNITS } = await import('../../src/content/index');
+  const problems = UNITS.flatMap((u) => u.lessons.flatMap((l) => l.steps)).flatMap((s) => (s.kind === 'python' ? [s] : []));
+
+  test('there is a problem in each of the first two units', () => {
+    expect(problems.map((p) => p.id)).toEqual(['py-pair-with-sum', 'py-max-window-sum']);
+  });
+
+  test.skipIf(!hasPython).each(problems.map((p) => [p.id, p] as const))('%s', (_id, p) => {
+    const dir = mkdtempSync(join(tmpdir(), 'iq-ref-'));
+    const file = join(dir, 'run.py');
+    writeFileSync(file, buildHarness(p.reference, p.fn, p.tests));
+    const out = execFileSync('python3', ['-I', file]).toString();
+    const { results } = JSON.parse(out.trim().split('\n').pop()!) as { results: { ok: boolean; got: string; error: string | null }[] };
+    expect(results).toHaveLength(p.tests.length);
+    results.forEach((r, i) => expect(r, `test ${i}: ${JSON.stringify(p.tests[i])}`).toMatchObject({ ok: true, error: null }));
+  });
+
+  test.skipIf(!hasPython).each(problems.map((p) => [p.id, p] as const))('%s: the starter does not already pass', (_id, p) => {
+    const dir = mkdtempSync(join(tmpdir(), 'iq-start-'));
+    const file = join(dir, 'run.py');
+    writeFileSync(file, buildHarness(p.starter, p.fn, p.tests));
+    const out = execFileSync('python3', ['-I', file]).toString();
+    const { results } = JSON.parse(out.trim().split('\n').pop()!) as { results: { ok: boolean }[] };
+    expect(results.some((r) => !r.ok)).toBe(true);
+  });
+});
