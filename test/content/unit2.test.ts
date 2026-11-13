@@ -85,3 +85,41 @@ describe('practice lessons', () => {
     expect(p.walkthrough.length).toBeGreaterThanOrEqual(8);
   });
 });
+
+describe('tech talk decks', () => {
+  const cards = (id: string) => lesson(id).steps.flatMap((s) => (s.kind === 'quiz' ? [s] : []));
+  const byTopic = (id: string) => {
+    const out: Record<string, number> = {};
+    for (const c of cards(id)) out[c.topic] = (out[c.topic] ?? 0) + 1;
+    return out;
+  };
+
+  test('each deck is one short intro and nine cards over its two topics', () => {
+    for (const id of ['talk-request-path', 'talk-messaging']) {
+      expect(lesson(id).steps[0].kind).toBe('explain');
+      expect(lesson(id).steps.slice(1).every((s) => s.kind === 'quiz')).toBe(true);
+      expect(cards(id)).toHaveLength(9);
+    }
+    expect(byTopic('talk-request-path')).toEqual({ 'talk-networking': 5, 'talk-apis': 4 });
+    expect(byTopic('talk-messaging')).toEqual({ 'talk-messaging': 5, 'talk-reliability': 4 });
+  });
+
+  test('every card has a tt- id, at least three options, a real explanation and a look-up phrase', () => {
+    for (const c of [...cards('talk-request-path'), ...cards('talk-messaging')]) {
+      expect(c.id.startsWith('tt-'), c.id).toBe(true);
+      expect(c.options.length, c.id).toBeGreaterThanOrEqual(3);
+      expect(c.why.length, c.id).toBeGreaterThan(80);
+      expect(c.lookUp, c.id).toBeTruthy();
+    }
+  });
+
+  test('look-up phrases are unique', () => {
+    const phrases = [...cards('talk-request-path'), ...cards('talk-messaging')].map((c) => c.lookUp);
+    expect(new Set(phrases).size).toBe(phrases.length);
+  });
+
+  test('the right answer is not always in the same position', () => {
+    for (const id of ['talk-request-path', 'talk-messaging'])
+      expect(new Set(cards(id).map((c) => c.answer)).size, id).toBeGreaterThanOrEqual(3);
+  });
+});

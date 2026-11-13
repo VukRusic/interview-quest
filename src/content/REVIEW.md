@@ -98,3 +98,27 @@ Same rules as Unit 1. Visuals use illustrative numbers; check that what they *te
 - [ ] `sw-which-variable`
 - [ ] `sw-which-not`
 - [ ] `py-max-window-sum` (prompt, 8 tests, reference, 10 walkthrough frames)
+
+## talk-request-path (lesson, talk)
+- [ ] explain: "Terms interviewers drop in passing"
+- [ ] `tt-dns-ttl`
+- [ ] `tt-cdn`
+- [ ] `tt-tls-termination`
+- [ ] `tt-reverse-proxy`
+- [ ] `tt-http2-multiplexing`
+- [ ] `tt-api-gateway`
+- [ ] `tt-rest-vs-grpc`
+- [ ] `tt-realtime-push`
+- [ ] `tt-cursor-pagination`
+
+## talk-messaging (lesson, talk)
+- [ ] explain: "The vocabulary around queues and failure"
+- [ ] `tt-log-vs-queue`
+- [ ] `tt-pub-sub`
+- [ ] `tt-delivery-guarantees`
+- [ ] `tt-dead-letter`
+- [ ] `tt-consumer-groups`
+- [ ] `tt-backpressure`
+- [ ] `tt-breaker-half-open`
+- [ ] `tt-token-bucket`
+- [ ] `tt-bulkhead`
