@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { indexItems, UNITS } from '../content/index';
 import type { Lesson, Unit } from '../content/types';
-import { buildSession } from '../core/session';
+import { buildSession, lessonAccess } from '../core/session';
 import { displayStreak } from '../core/streak';
 import { backupStatus } from '../state/backup';
 import { useProgress } from '../state/useProgress';
@@ -10,16 +10,14 @@ import { ReadinessMap } from './ReadinessMap';
 import { Sprite } from './sprites/Sprite';
 
 const SLOT_LABEL: Record<Lesson['slot'], string> = { lesson: 'Lesson', practice: 'Practice', extra: 'Extra' };
+const BADGE = { done: 'Done', next: 'Next', today: 'Today', tomorrow: 'Tomorrow', later: 'Later' } as const;
 
 export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
   const { progress, today } = useProgress();
   const session = buildSession(units, progress, today);
-  const all = units.flatMap((u) => u.lessons.map((l) => ({ unit: u, lesson: l })));
-  const byId = new Map(all.map((x) => [x.lesson.id, x.lesson]));
+  const byId = new Map(units.flatMap((u) => u.lessons.map((l) => [l.id, l] as const)));
   const doneToday = (id?: string) => !!id && progress.completed[id] === today;
-  const nextId = all.find((x) => !progress.completed[x.lesson.id])?.lesson.id;
-  const inSession = new Set([session.lesson, session.practice, ...session.extras].filter(Boolean));
-  const unitDone = !session.lesson && !session.practice;
+  const nextId = session.lessons.find((id) => !progress.completed[id]);
   const s = progress.streak;
   const shown = displayStreak(s, today);
   const streakHint =
@@ -29,16 +27,16 @@ export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
         ? `Do one card or lesson today to make it ${shown + 1}.`
         : 'Do one card or lesson today to start a streak.';
 
-  const card = (slot: Lesson['slot'], id?: string) => {
-    const l = id ? byId.get(id) : undefined;
+  const card = (id: string) => {
+    const l = byId.get(id);
     if (!l) return null;
     const done = doneToday(id);
     return (
       <li key={l.id} className={`quest ${done ? 'is-done' : ''}`}>
         <Link to={`/lesson/${l.id}`} className="quest-link">
-          <span className="quest-slot">{SLOT_LABEL[slot]}</span>
+          <span className="quest-slot">{PILLAR_LABELS[l.pillar]}</span>
           <span className="quest-title">{l.title}</span>
-          <span className="quest-meta muted">{PILLAR_LABELS[l.pillar]}</span>
+          <span className="quest-meta muted">{SLOT_LABEL[l.slot]}</span>
           <span className="quest-check" aria-label={done ? 'done' : 'to do'}>
             {done ? '✓' : ''}
           </span>
@@ -71,7 +69,7 @@ export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
         </Link>
       )}
 
-      {unitDone ? (
+      {session.allDone ? (
         <div className="unit-done">
           <Sprite name="castle" size={6} />
           <h2>Unit complete</h2>
@@ -100,20 +98,24 @@ export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
           )}
         </li>
         {session.resolve && <ResolveCard id={session.resolve} units={units} />}
-        {card('lesson', session.lesson)}
-        {card('practice', session.practice)}
-        {session.extras.map((id) => card('extra', id))}
+        {session.lessons.map(card)}
       </ol>
+      {session.held && (
+        <p className="held-note">
+          That's today's two new lessons. The next one opens tomorrow. Reviews and finished lessons stay open.
+        </p>
+      )}
 
       {units.map((u) => (
         <section key={u.id} className="unit">
           <h2>{u.title}</h2>
           <ol className="trail" aria-label={`Unit path: ${u.title}`}>
             {u.lessons.map((l) => {
-              const done = !!progress.completed[l.id];
+              const access = lessonAccess(session, progress, l.id);
+              const done = access === 'done';
               const isNext = l.id === nextId;
-              const open = done || isNext || inSession.has(l.id);
-              const state = done ? 'done' : isNext ? 'next' : open ? 'open' : 'locked';
+              const open = done || access === 'today';
+              const state = done ? 'done' : isNext ? 'next' : access;
               const body = (
                 <>
                   <span className="trail-mark" aria-hidden="true">
@@ -126,7 +128,7 @@ export function HomeScreen({ units = UNITS }: { units?: Unit[] }) {
                     </span>
                   </span>
                   <span className={`trail-badge badge-${state}`}>
-                    {state === 'done' ? 'Done' : state === 'next' ? 'Next' : state === 'open' ? 'Today' : 'Locked'}
+                    {BADGE[state]}
                   </span>
                 </>
               );

@@ -1,16 +1,17 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { findLesson, ITEMS } from '../content/index';
-import type { Lesson } from '../content/types';
+import { findLesson, ITEMS, UNITS } from '../content/index';
+import type { Lesson, Unit } from '../content/types';
+import { buildSession, lessonAccess } from '../core/session';
 import { readiness } from '../core/readiness';
 import { useProgress } from '../state/useProgress';
 import { StepView } from './steps/StepView';
 import type { StepResult } from './steps/types';
 import { topicLabel } from './labels';
 
-export function LessonRoute() {
+export function LessonRoute({ units = UNITS }: { units?: Unit[] }) {
   const { lessonId = '' } = useParams();
-  const found = findLesson(lessonId);
+  const found = findLesson(lessonId, units);
   if (!found) {
     return (
       <section>
@@ -22,7 +23,32 @@ export function LessonRoute() {
       </section>
     );
   }
-  return <LessonScreen key={lessonId} lesson={found.lesson} />;
+  return <GatedLesson key={lessonId} lesson={found.lesson} units={units} />;
+}
+
+/**
+ * Applies the daily limit. Once a lesson has been shown it is never taken away: not when the date
+ * rolls over, and not when finishing it uses up today. A held notice is re-checked on every render.
+ */
+function GatedLesson({ lesson, units }: { lesson: Lesson; units: Unit[] }) {
+  const { progress, today } = useProgress();
+  const access = lessonAccess(buildSession(units, progress, today), progress, lesson.id);
+  // Latch only the open state. A held notice must stay live, or it would outlive the day it was true.
+  const opened = useRef(false);
+  if (access === 'done' || access === 'today') opened.current = true;
+  if (!opened.current && (access === 'tomorrow' || access === 'later')) {
+    return (
+      <section className="held">
+        <h1>{access === 'tomorrow' ? 'Opens tomorrow' : 'Not yet'}</h1>
+        <p className="lead">{lesson.title}</p>
+        <p>You can do two new lessons a day. Reviews and finished lessons stay open.</p>
+        <Link className="btn btn-primary" to="/">
+          Back to today
+        </Link>
+      </section>
+    );
+  }
+  return <LessonScreen lesson={lesson} />;
 }
 
 export function LessonScreen({ lesson }: { lesson: Lesson }) {

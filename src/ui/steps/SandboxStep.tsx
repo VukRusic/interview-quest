@@ -3,13 +3,13 @@ import { Background, Handle, Position, ReactFlow, type Edge, type Node, type Nod
 import '@xyflow/react/dist/style.css';
 import type { SandboxStep as Sandbox } from '../../content/types';
 import { COMPONENTS, SCENARIOS } from '../../content/scenarios';
-import { eventMetrics, KINDS, meetsSlo, type Architecture, type ComponentKind, type Metrics } from '../../core/sandbox';
+import { eventMetrics, idleAppHint, KINDS, meetsSlo, servingApps, type Architecture, type ComponentKind, type Metrics } from '../../core/sandbox';
 import type { StepProps } from './types';
 
 const MAX_COUNT: Record<ComponentKind, number> = { cdn: 1, lb: 1, app: 4, cache: 2, queue: 1, db: 1, replica: 3 };
 const MIN_COUNT: Partial<Record<ComponentKind, number>> = { app: 1, db: 1 };
 
-type TierData = { label: string; count: number; hot: boolean; down: boolean; util: number | null };
+type TierData = { label: string; count: number; hot: boolean; down: boolean; downCount: number; idle: number; util: number | null };
 
 function TierNode({ data }: NodeProps<Node<TierData>>) {
   return (
@@ -19,6 +19,8 @@ function TierNode({ data }: NodeProps<Node<TierData>>) {
       <div className="tier-meta">
         {data.count > 1 ? `×${data.count}` : ''}
         {data.down ? ' down' : data.util !== null ? ` ${Math.round(data.util * 100)}% busy` : ''}
+        {!data.down && data.downCount > 0 ? `, ${data.downCount} down` : ''}
+        {data.idle > 0 ? `, ${data.idle} idle` : ''}
       </div>
       <Handle type="source" position={Position.Right} isConnectable={false} />
     </div>
@@ -26,7 +28,7 @@ function TierNode({ data }: NodeProps<Node<TierData>>) {
 }
 const nodeTypes = { tier: TierNode };
 
-function buildGraph(arch: Architecture, m: Metrics, dbDown: boolean): { nodes: Node<TierData>[]; edges: Edge[] } {
+function buildGraph(arch: Architecture, m: Metrics, dbDown: boolean, appDown: number, narrow: boolean): { nodes: Node<TierData>[]; edges: Edge[] } {
   const order: (ComponentKind | 'users')[] = ['users', ...KINDS.filter((k) => arch[k] > 0)];
   const nodes: Node<TierData>[] = order.map((k, i) => {
     const tier = k === 'users' ? undefined : m.tiers.find((t) => t.kind === k);
@@ -34,14 +36,19 @@ function buildGraph(arch: Architecture, m: Metrics, dbDown: boolean): { nodes: N
     return {
       id: k,
       type: 'tier',
-      position: { x: i * 150, y: k === 'replica' || k === 'cdn' ? 70 : 0 },
+      // On a phone, wrap to rows of three so the labels stay readable.
+      position: narrow
+        ? { x: (i % 3) * 150, y: Math.floor(i / 3) * 100 }
+        : { x: i * 150, y: k === 'replica' || k === 'cdn' ? 70 : 0 },
       draggable: false,
       selectable: false,
       data: {
         label: k === 'users' ? 'Users' : COMPONENTS[k].label,
         count: k === 'users' ? 1 : arch[k],
         hot: m.bottleneck === k,
-        down: dbDown && k === 'db',
+        down: (dbDown && k === 'db') || (k === 'app' && tier?.capacity === 0),
+        downCount: k === 'app' ? Math.min(appDown, arch.app) : 0,
+        idle: k === 'app' && arch.lb === 0 ? arch.app - 1 : 0,
         util,
       },
     };
@@ -83,7 +90,10 @@ export function SandboxStep({ step, onDone }: StepProps<Sandbox>) {
   const m = all[eventIdx];
   const ev = sc.events[eventIdx];
   const solved = all.every((x) => meetsSlo(x, sc.slo));
-  const graph = buildGraph(arch, m, !!ev.load.dbDown);
+  const narrow = typeof window !== 'undefined' && !!window.matchMedia?.('(max-width: 560px)').matches;
+  const graph = buildGraph(arch, m, !!ev.load.dbDown, ev.load.appDown ?? 0, narrow);
+  const idleHint = idleAppHint(sc, arch);
+  const noApps = servingApps(arch, ev.load) === 0;
 
   const change = (k: ComponentKind, d: number) =>
     setArch((a) => ({ ...a, [k]: Math.min(MAX_COUNT[k], Math.max(MIN_COUNT[k] ?? 0, a[k] + d)) }));
@@ -100,11 +110,13 @@ export function SandboxStep({ step, onDone }: StepProps<Sandbox>) {
       <p>{sc.story}</p>
       <div className="flow-box" aria-label="Architecture diagram">
         <ReactFlow
+          key={graph.nodes.length /* refit the view when a tier is added or removed */}
           nodes={graph.nodes}
           edges={graph.edges}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.15 }}
+          fitViewOptions={{ padding: 0.08 }}
+          minZoom={0.2}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
@@ -187,8 +199,11 @@ export function SandboxStep({ step, onDone }: StepProps<Sandbox>) {
               )}% of capacity.`
             : ev.load.dbDown && arch.replica === 0
               ? 'The database is down and nothing else can answer reads.'
-              : 'No component is near its limit.'}
+              : noApps
+                ? 'No app server is left to answer requests.'
+                : 'No component is near its limit.'}
         </p>
+        {idleHint && <p className="metric-note">{idleHint}</p>}
         <p className="muted small">Illustrative numbers from a simple capacity model, not real benchmarks.</p>
       </div>
 

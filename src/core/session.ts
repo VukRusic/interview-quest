@@ -1,11 +1,19 @@
 import { indexItems } from '../content/index';
-import type { Lesson, Unit } from '../content/types';
+import type { Unit } from '../content/types';
 import type { Progress } from '../state/progress';
 import type { DayKey } from './dates';
 import { dueQueue } from './srs';
 
-/** `resolve` is an occasional re-solve of a full problem (Python or sandbox) that has come due. */
-export type DailySession = { review: string[]; resolve?: string; lesson?: string; practice?: string; extras: string[] };
+/** How many lessons can be finished for the first time in one day. Reviews and replays are never limited. */
+export const DAILY_NEW_LESSONS = 2;
+
+/**
+ * `resolve` is an occasional re-solve of a full problem (Python or sandbox) that has come due.
+ * `lessons` are today's: the ones first finished today plus the next not-yet-finished ones, in trail
+ * order, up to the daily allowance. `held` = the allowance is used and more lessons are waiting.
+ */
+export type DailySession = { review: string[]; resolve?: string; lessons: string[]; held: boolean; allDone: boolean };
+export type LessonAccess = 'done' | 'today' | 'tomorrow' | 'later';
 
 const REVIEW_CAP = 15;
 
@@ -26,20 +34,24 @@ export function buildSession(units: Unit[], progress: Progress, today: DayKey): 
   const resolve =
     problems.find((s) => s.lastAnswered === today && s.box > 0)?.id ?? dueQueue(problems, today, 1)[0]?.id;
 
-  // Open for today = not completed, or completed today (so the session stays stable after finishing).
-  const openToday = (l: Lesson) => {
-    const done = progress.completed[l.id];
-    return !done || done === today;
+  const path = units.flatMap((u) => u.lessons.map((l) => l.id));
+  const doneToday = path.filter((id) => progress.completed[id] === today);
+  const waiting = path.filter((id) => !progress.completed[id]);
+  const fresh = new Set(waiting.slice(0, Math.max(0, DAILY_NEW_LESSONS - doneToday.length)));
+  const lessons = path.filter((id) => progress.completed[id] === today || fresh.has(id));
+
+  return {
+    review,
+    resolve,
+    lessons,
+    held: doneToday.length >= DAILY_NEW_LESSONS && waiting.length > 0,
+    allDone: waiting.length === 0,
   };
-  const path = units.flatMap((u) => u.lessons.map((l) => ({ unit: u, lesson: l })));
-  const firstOpen = (slot: Lesson['slot']) => path.find((p) => p.lesson.slot === slot && openToday(p.lesson));
+}
 
-  const lesson = firstOpen('lesson');
-  const practice = firstOpen('practice');
-  const currentUnit = lesson?.unit ?? path.find((p) => openToday(p.lesson))?.unit;
-  const extras = currentUnit
-    ? currentUnit.lessons.filter((l) => l.slot === 'extra' && openToday(l)).map((l) => l.id)
-    : [];
-
-  return { review, resolve, lesson: lesson?.lesson.id, practice: practice?.lesson.id, extras };
+/** Whether a lesson can be opened now. Finished lessons always can. */
+export function lessonAccess(session: DailySession, progress: Progress, lessonId: string): LessonAccess {
+  if (progress.completed[lessonId]) return 'done';
+  if (session.lessons.includes(lessonId)) return 'today';
+  return session.held ? 'tomorrow' : 'later';
 }

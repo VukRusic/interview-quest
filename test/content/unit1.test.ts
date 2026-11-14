@@ -5,6 +5,7 @@ import { VISUALS } from '../../src/ui/visuals';
 import { unit1 } from '../../src/content/unit1';
 
 const steps = UNITS.flatMap((u) => u.lessons.flatMap((l) => l.steps));
+const unit1Steps = unit1.lessons.flatMap((l) => l.steps);
 
 test('content passes the schema and validation', () => {
   expect(() => UNITS.forEach((u) => UnitSchema.parse(u))).not.toThrow();
@@ -27,7 +28,7 @@ test('unit 1 has 8 lessons covering every pillar, in the planned order', () => {
 });
 
 test('bug cards use every language at least once', () => {
-  const langs = new Set(steps.flatMap((s) => (s.kind === 'bug' ? [s.lang] : [])));
+  const langs = new Set(unit1Steps.flatMap((s) => (s.kind === 'bug' ? [s.lang] : [])));
   expect(langs).toEqual(new Set(['csharp', 'typescript', 'python']));
 });
 
@@ -50,13 +51,13 @@ test('every sandbox step points at an existing scenario', () => {
   for (const s of steps) if (s.kind === 'sandbox') expect(SCENARIOS[s.scenarioId], s.scenarioId).toBeDefined();
 });
 
-test('every item uses a planned topic', () => {
+test('every unit 1 item uses a planned topic', () => {
   const topics = new Set(['design-flow', 'caching', 'scaling-db', 'two-pointers', 'async', 'data-access', 'frontend-state', 'security', 'sql-indexing', 'behavioural']);
-  for (const { step } of indexItems(UNITS).values()) expect(topics.has(step.topic), `${step.id}: ${step.topic}`).toBe(true);
+  for (const { step } of indexItems([unit1]).values()) expect(topics.has(step.topic), `${step.id}: ${step.topic}`).toBe(true);
 });
 
 test('the pair_with_sum problem has at least 6 tests and 8 walkthrough frames', () => {
-  const p = steps.find((s) => s.kind === 'python');
+  const p = steps.find((s) => s.kind === 'python' && s.id === 'py-pair-with-sum');
   expect(p?.kind === 'python' && p.fn).toBe('pair_with_sum');
   if (p?.kind !== 'python') return;
   expect(p.tests.length).toBeGreaterThanOrEqual(6);

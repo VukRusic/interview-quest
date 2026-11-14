@@ -1,11 +1,11 @@
 import { indexItems } from '../content/index';
 import type { Pillar, Unit } from '../content/types';
-import { readiness } from '../core/readiness';
+import { practised, readiness } from '../core/readiness';
 import { isLearned } from '../core/srs';
 import { useProgress } from '../state/useProgress';
 import { PILLAR_LABELS, topicLabel } from './labels';
 
-/** One bar per topic, grouped by pillar. Bars fill only from answers that held on review. */
+/** One bar per topic, grouped by pillar. Solid fill = held on review; lighter fill = practised at least once. */
 export function ReadinessMap({ units }: { units: Unit[] }) {
   const { progress } = useProgress();
   const items = indexItems(units);
@@ -23,7 +23,7 @@ export function ReadinessMap({ units }: { units: Unit[] }) {
     <section className="readiness" aria-labelledby="readiness-h">
       <h2 id="readiness-h">Readiness</h2>
       <p className="muted small">
-        Bars fill from right answers that still hold days later. Self-graded work counts half.
+        The solid fill is what held up on review days later. The lighter fill is what you have practised.
       </p>
       {[...byPillar].map(([pillar, topics]) => (
         <div key={pillar} className="pillar">
@@ -40,11 +40,11 @@ export function ReadinessMap({ units }: { units: Unit[] }) {
               const learned = auto.filter((id) => progress.srs[id] && isLearned(progress.srs[id])).length;
               const autoStarted = auto.filter((id) => progress.srs[id]).length;
               const selfDone = self.filter((id) => progress.selfGrades[id] !== undefined).length;
-              const parts: string[] = [];
+              const pr = practised(topic, progress, items);
+              const parts: string[] = [`${autoStarted + selfDone} of ${ids.length} practised`];
               if (auto.length) {
                 if (learned === auto.length) parts.push('learned');
-                else if (autoStarted === 0) parts.push('not started');
-                else parts.push(`${learned} of ${auto.length} learned, ${autoStarted - learned} in progress`);
+                else if (autoStarted > 0) parts.push(`${learned} of ${auto.length} learned, ${autoStarted - learned} in progress`);
               }
               if (self.length) parts.push(selfDone ? `${selfDone} of ${self.length} self-graded` : 'not self-graded yet');
               const status = parts.join('; ');
@@ -62,7 +62,8 @@ export function ReadinessMap({ units }: { units: Unit[] }) {
                     aria-valuemax={100}
                     aria-valuenow={Math.round(r * 100)}
                   >
-                    <span style={{ width: `${r * 100}%` }} />
+                    <span className="rd-practised" style={{ width: `${Math.round(pr * 100)}%` }} />
+                    <span className="rd-proven" style={{ width: `${r * 100}%` }} />
                   </div>
                   <div className="rd-status muted">{status}</div>
                 </li>
