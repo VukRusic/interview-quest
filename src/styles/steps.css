@@ -915,3 +915,58 @@ h1 .sprite {
 .tok-reply {
   background: var(--bad);
 }
+
+/* Prompt exercise */
+.prompt-material h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.prompt-notes {
+  max-height: 14rem;
+  overflow-y: auto;
+  padding: var(--space-3);
+  border: 2px solid var(--line);
+  background: var(--surface-2);
+  font-size: 0.92rem;
+}
+.prompt-notes p {
+  margin: 0;
+}
+.prompt-notes p + p {
+  margin-top: var(--space-2);
+}
+.budget-bar {
+  height: 14px;
+  border: var(--px) solid var(--ink);
+  background: var(--surface-2);
+}
+.budget-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--pine);
+}
+.budget.is-over .budget-bar > span {
+  background: var(--bad);
+}
+.budget-text {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.budget-over {
+  color: var(--bad);
+}
+.budget-result {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+}
+.budget-result.is-right > span:first-child {
+  color: var(--pine);
+}
+.budget-result.is-wrong > span:first-child {
+  color: var(--bad);
+}
