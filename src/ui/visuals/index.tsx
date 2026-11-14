@@ -1,7 +1,11 @@
 import type { FC } from 'react';
 import { CacheFlow } from './CacheFlow';
 import { DesignFlow } from './DesignFlow';
+import { DataShapes } from './DataShapes';
 import { LoadBalancer } from './LoadBalancer';
+import { Quorum } from './Quorum';
+import { ReplicationLag } from './ReplicationLag';
+import { ShardKeys } from './ShardKeys';
 import { QueueBuffer } from './QueueBuffer';
 import { RetryStorm } from './RetryStorm';
 import { SlidingWindow } from './SlidingWindow';
@@ -17,4 +21,8 @@ export const VISUALS: Record<string, FC> = {
   'retry-storm': RetryStorm,
   'sliding-window': SlidingWindow,
   'token-window': TokenWindow,
+  'data-shapes': DataShapes,
+  'replication-lag': ReplicationLag,
+  'shard-keys': ShardKeys,
+  quorum: Quorum,
 };

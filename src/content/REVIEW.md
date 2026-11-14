@@ -142,3 +142,40 @@ Checked against Anthropic's API reference on 2026-11-13. Kept to what holds acro
 # Unit 3: Data at scale
 
 Same rules as before. Visuals and sandbox numbers are illustrative; check that what they *teach* is right.
+
+## sql-vs-nosql (lesson, design)
+- [ ] explain: "Shape the data for the questions you will ask" (+ DataShapes visual)
+- [ ] explain: "How to answer \"which database?\" in an interview"
+- [ ] `db-default`
+- [ ] `db-access-patterns`
+- [ ] `db-key-value-fit`
+- [ ] `db-transaction` (check the hedge about NoSQL transactions)
+- [ ] `db-several-stores`
+
+## replication (lesson, design)
+- [ ] explain: "One leader, several copies" (+ ReplicationLag visual)
+- [ ] explain: "What the delay costs you" (sync vs async, split brain, replica is not a backup)
+- [ ] `rep-what-for`
+- [ ] `rep-stale-read`
+- [ ] `rep-read-your-writes`
+- [ ] `rep-sync-trade-off`
+- [ ] `rep-split-brain`
+
+## sharding (lesson, design)
+- [ ] explain: "Splitting the data itself" (+ ShardKeys visual)
+- [ ] explain: "Why you shard late"
+- [ ] `shard-vs-replication`
+- [ ] `shard-hot`
+- [ ] `shard-range-query`
+- [ ] `shard-rebalance`
+- [ ] `shard-when`
+
+## consistency (lesson, design)
+- [ ] explain: "How current is a read?" (+ Quorum visual, R + W > N)
+- [ ] explain: "CAP, said correctly"
+- [ ] `cons-eventual`
+- [ ] `cons-cap`
+- [ ] `cons-quorum`
+- [ ] `cons-needs-strong`
+- [ ] `bug-read-after-write` (C#, EF Core)
+- [ ] `bug-lost-update` (Python; check the single-statement UPDATE fix)

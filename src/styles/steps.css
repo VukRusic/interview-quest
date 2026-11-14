@@ -970,3 +970,33 @@ h1 .sprite {
 .budget-result.is-wrong > span:first-child {
   color: var(--bad);
 }
+
+/* Unit 3 visuals */
+.shape-data {
+  margin: 0;
+  padding: var(--space-3);
+  border: 2px solid var(--line);
+  background: var(--surface-2);
+  font-family: var(--font-code);
+  font-size: 0.78rem;
+  overflow-x: auto;
+  white-space: pre;
+}
+.viz .btn[aria-pressed='true'] {
+  background: var(--sun-soft);
+}
+.viz-stats .stat-text {
+  font-size: 0.85rem;
+}
+.shard-dots {
+  color: var(--sun);
+  letter-spacing: 1px;
+  word-break: break-all;
+  line-height: 1;
+}
+.quorum-verdict.is-right strong {
+  color: var(--pine);
+}
+.quorum-verdict.is-wrong strong {
+  color: var(--bad);
+}

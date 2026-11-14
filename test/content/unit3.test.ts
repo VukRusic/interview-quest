@@ -42,3 +42,42 @@ test('pillars and slots are as planned', () => {
     'lesson', 'lesson', 'lesson', 'lesson', 'practice', 'lesson', 'lesson', 'lesson', 'lesson', 'extra', 'extra',
   ]);
 });
+
+describe('design lessons', () => {
+  const visuals: Record<string, string> = {
+    'sql-vs-nosql': 'data-shapes',
+    replication: 'replication-lag',
+    sharding: 'shard-keys',
+    consistency: 'quorum',
+  };
+
+  test.each(Object.keys(visuals))('%s opens with its visual and has at least 4 real quiz steps', (id) => {
+    const first = lesson(id).steps[0];
+    expect(first.kind === 'explain' && first.visual).toBe(visuals[id]);
+    const quiz = kinds(id, 'quiz');
+    expect(quiz.length).toBeGreaterThanOrEqual(4);
+    for (const q of quiz) if (q.kind === 'quiz') expect(q.why.length, q.id).toBeGreaterThan(80);
+  });
+
+  test('consistency ends with two bug cards, C# then Python', () => {
+    const steps = lesson('consistency').steps;
+    expect(steps.slice(-2).map((s) => s.kind === 'bug' && `${s.id}:${s.lang}`)).toEqual([
+      'bug-read-after-write:csharp',
+      'bug-lost-update:python',
+    ]);
+    expect(kinds('consistency', 'bug')).toHaveLength(2);
+  });
+
+  test('the quorum question has the arithmetic right: 5 replicas, W = 3 → R = 3', () => {
+    const q = item('cons-quorum');
+    if (q.kind !== 'quiz') throw new Error('not a quiz');
+    expect(q.options[q.answer]).toBe('3');
+  });
+
+  test('CAP is stated as a choice during a partition, not "pick any two"', () => {
+    const q = item('cons-cap');
+    if (q.kind !== 'quiz') throw new Error('not a quiz');
+    expect(q.options[q.answer]).toMatch(/network|partition/i);
+    expect(q.options[q.answer]).not.toMatch(/any two/i);
+  });
+});

@@ -116,3 +116,72 @@ describe('token-window', () => {
     expect(screen.getByText(/no longer fits/i)).toBeInTheDocument();
   });
 });
+
+describe('data-shapes', () => {
+  test('the same question costs different work in rows and in a document', async () => {
+    show('data-shapes');
+    const note = () => screen.getByTestId('shape-note').textContent;
+    await userEvent.click(screen.getByRole('button', { name: /every order containing/i }));
+    const rows = note();
+    await userEvent.click(screen.getByRole('radio', { name: /one document/i }));
+    expect(note()).not.toBe(rows);
+    expect(note()).toMatch(/every order document/i);
+    await userEvent.click(screen.getByRole('button', { name: /order 42 with its items/i }));
+    expect(note()).toMatch(/one document read/i);
+  });
+});
+
+describe('replication-lag', () => {
+  test('asynchronous: the follower is behind until replication catches up', async () => {
+    show('replication-lag');
+    await userEvent.click(screen.getByRole('button', { name: /^Write/ }));
+    expect(stat('Leader has')).toBe('20');
+    expect(stat('Follower has')).toBe('10');
+    await userEvent.click(screen.getByRole('button', { name: /catch up/i }));
+    expect(stat('Follower has')).toBe('20');
+  });
+
+  test('synchronous: the follower has the write as soon as it is confirmed, and the write waits longer', async () => {
+    show('replication-lag');
+    await userEvent.click(screen.getByRole('button', { name: /^Write/ }));
+    const asyncWait = stat('Write confirmed after');
+    await userEvent.click(screen.getByRole('checkbox', { name: /synchronous/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^Write/ }));
+    expect(stat('Follower has')).toBe('20');
+    expect(stat('Write confirmed after')).not.toBe(asyncWait);
+  });
+});
+
+describe('shard-keys', () => {
+  test('sharding by country is lopsided; hashing the id is even', async () => {
+    show('shard-keys');
+    await userEvent.click(screen.getByRole('radio', { name: /country/i }));
+    expect(screen.getByTestId('shard-1')).toHaveTextContent('7 customers');
+    await userEvent.click(screen.getByRole('radio', { name: /hash/i }));
+    for (const n of [1, 2, 3]) expect(screen.getByTestId(`shard-${n}`)).toHaveTextContent('4 customers');
+  });
+
+  test('a query by country touches one shard under the country key and all three under the hash', async () => {
+    show('shard-keys');
+    await userEvent.click(screen.getByRole('radio', { name: /country/i }));
+    expect(stat('Shards asked for "all customers in Germany"')).toBe('1');
+    await userEvent.click(screen.getByRole('radio', { name: /hash/i }));
+    expect(stat('Shards asked for "all customers in Germany"')).toBe('3');
+  });
+});
+
+describe('quorum', () => {
+  const set = (name: RegExp, v: number) => fireEvent.change(screen.getByRole('slider', { name }), { target: { value: String(v) } });
+
+  test('R + W > N guarantees a read sees the latest write; otherwise it may be stale', () => {
+    show('quorum');
+    set(/writes wait for/i, 2);
+    set(/reads ask/i, 2);
+    expect(screen.getByTestId('quorum-verdict')).toHaveTextContent(/guaranteed/i);
+    set(/writes wait for/i, 1);
+    set(/reads ask/i, 1);
+    expect(screen.getByTestId('quorum-verdict')).toHaveTextContent(/may be stale/i);
+    set(/reads ask/i, 3);
+    expect(screen.getByTestId('quorum-verdict')).toHaveTextContent(/guaranteed/i);
+  });
+});
