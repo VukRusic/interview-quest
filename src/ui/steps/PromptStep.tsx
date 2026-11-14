@@ -30,7 +30,8 @@ export function PromptStep({ step, onDone }: StepProps<Prompt>) {
   return (
     <section className="step prompt-step">
       <p className="muted">Prompt exercise. Nobody is timing you, and nothing you write leaves this device.</p>
-      <h2 className="step-prompt">{step.brief}</h2>
+      <h2 className="step-prompt">The task</h2>
+      <p className="prompt-brief">{step.brief}</p>
 
       {step.material && (
         <div className="prompt-material">

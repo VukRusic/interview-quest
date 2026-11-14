@@ -1009,3 +1009,8 @@ h1 .sprite {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.prompt-brief {
+  margin: 0;
+  font-weight: 700;
+}
