@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { CacheFlow } from './CacheFlow';
 import { DesignFlow } from './DesignFlow';
 import { DataShapes } from './DataShapes';
+import { HashLookup } from './HashLookup';
 import { LoadBalancer } from './LoadBalancer';
 import { Quorum } from './Quorum';
 import { ReplicationLag } from './ReplicationLag';
@@ -25,4 +26,5 @@ export const VISUALS: Record<string, FC> = {
   'replication-lag': ReplicationLag,
   'shard-keys': ShardKeys,
   quorum: Quorum,
+  'hash-lookup': HashLookup,
 };

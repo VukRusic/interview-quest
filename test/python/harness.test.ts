@@ -75,8 +75,8 @@ describe('every reference solution passes its own tests under CPython', async ()
   const { UNITS } = await import('../../src/content/index');
   const problems = UNITS.flatMap((u) => u.lessons.flatMap((l) => l.steps)).flatMap((s) => (s.kind === 'python' ? [s] : []));
 
-  test('there is a problem in each of the first two units', () => {
-    expect(problems.map((p) => p.id)).toEqual(['py-pair-with-sum', 'py-max-window-sum']);
+  test('there is one problem in each unit', () => {
+    expect(problems.map((p) => p.id)).toEqual(['py-pair-with-sum', 'py-max-window-sum', 'py-two-sum']);
   });
 
   test.skipIf(!hasPython).each(problems.map((p) => [p.id, p] as const))('%s', (_id, p) => {

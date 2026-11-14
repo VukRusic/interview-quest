@@ -81,3 +81,41 @@ describe('design lessons', () => {
     expect(q.options[q.answer]).not.toMatch(/any two/i);
   });
 });
+
+describe('practice lessons', () => {
+  test('dashboard-rush explains first, then runs the dashboard scenario', () => {
+    const steps = lesson('dashboard-rush').steps;
+    expect(steps.map((s) => s.kind)).toEqual(['explain', 'sandbox']);
+    expect(steps[1]).toMatchObject({ id: 'sandbox-dashboard-rush', topic: 'scaling-db', scenarioId: 'dashboard-rush' });
+    expect(SCENARIOS['dashboard-rush']).toBeDefined();
+  });
+
+  test('hash-map: a visual, three recognition questions, then two_sum', () => {
+    const steps = lesson('hash-map').steps;
+    const first = steps[0];
+    expect(first.kind === 'explain' && first.visual).toBe('hash-lookup');
+    const quiz = kinds('hash-map', 'quiz');
+    expect(quiz).toHaveLength(3);
+    for (const q of quiz) expect(q.kind === 'quiz' && q.id.startsWith('hm-which-')).toBe(true);
+    const p = steps[steps.length - 1];
+    expect(p.kind === 'python' && p.id).toBe('py-two-sum');
+    if (p.kind !== 'python') return;
+    expect(p.fn).toBe('two_sum');
+    expect(p.tests.length).toBeGreaterThanOrEqual(7);
+    expect(p.walkthrough.length).toBeGreaterThanOrEqual(8);
+    expect(p.tests).toContainEqual({ args: [[3, 3], 6], expected: [0, 1] });
+    expect(p.tests).toContainEqual({ args: [[5], 10], expected: null });
+  });
+
+  test('each two_sum test has at most one valid pair', () => {
+    const p = item('py-two-sum');
+    if (p.kind !== 'python') throw new Error('not python');
+    for (const t of p.tests) {
+      const [nums, target] = t.args as [number[], number];
+      let pairs = 0;
+      for (let i = 0; i < nums.length; i++) for (let j = i + 1; j < nums.length; j++) if (nums[i] + nums[j] === target) pairs++;
+      expect(pairs, JSON.stringify(t.args)).toBeLessThanOrEqual(1);
+      expect(pairs === 1, JSON.stringify(t.args)).toBe(t.expected !== null);
+    }
+  });
+});

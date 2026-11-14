@@ -185,3 +185,17 @@ describe('quorum', () => {
     expect(screen.getByTestId('quorum-verdict')).toHaveTextContent(/guaranteed/i);
   });
 });
+
+describe('hash-lookup', () => {
+  test('one pass: each step asks for the number that completes the current one, and the last step finds the pair', async () => {
+    show('hash-lookup');
+    expect(screen.getByTestId('hash-need')).toHaveTextContent('1');
+    const next = screen.getByRole('button', { name: 'Next step' });
+    await userEvent.click(next);
+    expect(screen.getByTestId('hash-need')).toHaveTextContent('6');
+    expect(screen.getByTestId('hash-seen')).toHaveTextContent('8');
+    for (let i = 0; i < 3; i++) await userEvent.click(next);
+    expect(next).toBeDisabled();
+    expect(screen.getByText(/positions 3 and 4/)).toBeInTheDocument();
+  });
+});

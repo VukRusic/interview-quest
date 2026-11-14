@@ -179,3 +179,14 @@ Same rules as before. Visuals and sandbox numbers are illustrative; check that w
 - [ ] `cons-needs-strong`
 - [ ] `bug-read-after-write` (C#, EF Core)
 - [ ] `bug-lost-update` (Python; check the single-statement UPDATE fix)
+
+## dashboard-rush (practice, design)
+- [ ] explain: "Before you build"
+- [ ] `sandbox-dashboard-rush` (story, four events, SLO, budget and lesson text in `scenarios.ts`; rule that a queue holds writes while the primary is down)
+
+## hash-map (lesson, algo)
+- [ ] explain: "Remember what you have seen" (+ HashLookup visual)
+- [ ] `hm-which-group`
+- [ ] `hm-which-set`
+- [ ] `hm-which-not`
+- [ ] `py-two-sum` (prompt, 8 tests, reference, 12 walkthrough frames)
