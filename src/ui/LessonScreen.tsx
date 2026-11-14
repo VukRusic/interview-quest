@@ -27,13 +27,16 @@ export function LessonRoute({ units = UNITS }: { units?: Unit[] }) {
 }
 
 /**
- * Applies the daily limit. Access is decided once, when the lesson is opened, so a lesson already on
- * screen is never taken away: not when the date rolls over, and not when finishing it uses up today.
+ * Applies the daily limit. Once a lesson has been shown it is never taken away: not when the date
+ * rolls over, and not when finishing it uses up today. A held notice is re-checked on every render.
  */
 function GatedLesson({ lesson, units }: { lesson: Lesson; units: Unit[] }) {
   const { progress, today } = useProgress();
-  const [access] = useState(() => lessonAccess(buildSession(units, progress, today), progress, lesson.id));
-  if (access === 'tomorrow' || access === 'later') {
+  const access = lessonAccess(buildSession(units, progress, today), progress, lesson.id);
+  // Latch only the open state. A held notice must stay live, or it would outlive the day it was true.
+  const opened = useRef(false);
+  if (access === 'done' || access === 'today') opened.current = true;
+  if (!opened.current && (access === 'tomorrow' || access === 'later')) {
     return (
       <section className="held">
         <h1>{access === 'tomorrow' ? 'Opens tomorrow' : 'Not yet'}</h1>

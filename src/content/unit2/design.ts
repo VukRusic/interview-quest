@@ -327,7 +327,7 @@ A **circuit breaker** protects a dependency that keeps failing. After enough fai
       ],
       answer: 2,
       why: 'EnsureSuccessStatusCode throws on any error status, including a 502 or 504 from a gateway in front of a provider that did complete the charge. The loop then posts a brand-new charge. It also retries with no pause, which piles load on a provider that is already struggling, and it retries errors that can never succeed, such as a declined card.',
-      fix: 'Create one idempotency key per order (for example from the order id) and send it as an `Idempotency-Key` header on every attempt, so the provider returns the first result instead of charging again. Wait between attempts with exponential backoff and jitter, and only retry network errors and 5xx responses, never 4xx.',
+      fix: 'Create one idempotency key per order (for example from the order id) and send it as an `Idempotency-Key` header on every attempt, so the provider returns the first result instead of charging again. Wait between attempts with exponential backoff and jitter, and only retry network errors and 5xx responses. Do not retry other 4xx responses such as a declined card; 429 (too many requests) is the exception, retried after the delay the provider asks for.',
     },
     {
       kind: 'bug',

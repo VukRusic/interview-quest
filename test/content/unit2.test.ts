@@ -1,5 +1,6 @@
 import { UNITS, validateContent, indexItems } from '../../src/content/index';
 import { unit2 } from '../../src/content/unit2';
+import { SCENARIOS } from '../../src/content/scenarios';
 
 const lesson = (id: string) => unit2.lessons.find((l) => l.id === id)!;
 const text = JSON.stringify(unit2);
@@ -162,5 +163,33 @@ describe('AI lesson, mock interview and story', () => {
 
   test('no lesson is still a placeholder', () => {
     expect(text).not.toMatch(/coming soon/i);
+  });
+});
+
+describe('content corrections from review', () => {
+  const item = (id: string) => indexItems([unit2]).get(id)!.step;
+
+  test('tt-cdn: no wrong option describes something a CDN also does', () => {
+    const s = item('tt-cdn');
+    if (s.kind !== 'quiz') throw new Error('not a quiz');
+    s.options.forEach((o, i) => { if (i !== s.answer) expect(o).not.toMatch(/decrypt|https/i); });
+  });
+
+  test('bug-retry-charge: the fix names 429 as the retryable 4xx and does not say "never 4xx"', () => {
+    const s = item('bug-retry-charge');
+    if (s.kind !== 'bug') throw new Error('not a bug');
+    expect(s.fix).toMatch(/429/);
+    expect(s.fix).not.toMatch(/never 4xx/i);
+  });
+
+  test('ai-tokens: memory claim is about the model, and the cost question is scoped to one request', () => {
+    expect(JSON.stringify(lesson('ai-tokens'))).toMatch(/model itself keeps \*\*no memory between requests\*\*/);
+    const s = item('ai-tok-output-cost');
+    expect(s.kind === 'quiz' && s.prompt).toMatch(/single request/);
+  });
+
+  test('flash-sale: the lesson does not promise the backlog clears quickly', () => {
+    expect(SCENARIOS['flash-sale'].lesson).not.toMatch(/a little later/);
+    expect(SCENARIOS['flash-sale'].story).toMatch(/ten-minute/);
   });
 });

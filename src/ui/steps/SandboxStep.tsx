@@ -3,7 +3,7 @@ import { Background, Handle, Position, ReactFlow, type Edge, type Node, type Nod
 import '@xyflow/react/dist/style.css';
 import type { SandboxStep as Sandbox } from '../../content/types';
 import { COMPONENTS, SCENARIOS } from '../../content/scenarios';
-import { eventMetrics, KINDS, meetsSlo, servingApps, type Architecture, type ComponentKind, type Metrics } from '../../core/sandbox';
+import { eventMetrics, idleAppHint, KINDS, meetsSlo, servingApps, type Architecture, type ComponentKind, type Metrics } from '../../core/sandbox';
 import type { StepProps } from './types';
 
 const MAX_COUNT: Record<ComponentKind, number> = { cdn: 1, lb: 1, app: 4, cache: 2, queue: 1, db: 1, replica: 3 };
@@ -92,7 +92,7 @@ export function SandboxStep({ step, onDone }: StepProps<Sandbox>) {
   const solved = all.every((x) => meetsSlo(x, sc.slo));
   const narrow = typeof window !== 'undefined' && !!window.matchMedia?.('(max-width: 560px)').matches;
   const graph = buildGraph(arch, m, !!ev.load.dbDown, ev.load.appDown ?? 0, narrow);
-  const idleApps = arch.app > 1 && arch.lb === 0;
+  const idleHint = idleAppHint(sc, arch);
   const noApps = servingApps(arch, ev.load) === 0;
 
   const change = (k: ComponentKind, d: number) =>
@@ -203,7 +203,7 @@ export function SandboxStep({ step, onDone }: StepProps<Sandbox>) {
                 ? 'No app server is left to answer requests.'
                 : 'No component is near its limit.'}
         </p>
-        {idleApps && <p className="metric-note">Extra app servers need a load balancer to receive traffic.</p>}
+        {idleHint && <p className="metric-note">{idleHint}</p>}
         <p className="muted small">Illustrative numbers from a simple capacity model, not real benchmarks.</p>
       </div>
 

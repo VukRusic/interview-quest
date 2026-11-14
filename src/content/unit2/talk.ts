@@ -44,7 +44,7 @@ These nine follow a request from the browser to your API. Pick the best descript
         'Translates the domain name into an IP address',
         'Spreads requests across your app servers and skips unhealthy ones',
         'Keeps copies of cacheable responses on servers near users, so those requests never reach your origin',
-        'Decrypts HTTPS and forwards the request to your servers',
+        'Holds requests in a queue so your servers can process them later',
       ],
       2,
       'A CDN is a network of caches spread around the world. Images, scripts and other cacheable responses are served from the nearest one, which cuts latency and takes load off your servers. What it may cache, and for how long, is controlled by the Cache-Control headers you send.',

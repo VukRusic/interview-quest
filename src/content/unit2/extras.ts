@@ -14,7 +14,7 @@ export const aiTokens = {
 
 The **context window** is the most tokens a model can work with in one request. It has to hold everything: your instructions, any documents, the conversation so far, and the reply being written.
 
-The API keeps **no memory between requests**. A chat only feels continuous because the application sends the whole conversation again on every turn. Add turns above and watch what each request carries, and what you have sent in total.`,
+The model itself keeps **no memory between requests**: whatever it should know has to be in the request. A chat feels continuous because the whole conversation is sent again on every turn. Add turns above and watch what each request carries, and what you have sent in total.`,
     },
     {
       kind: 'explain',
@@ -62,7 +62,7 @@ Four habits cover most of it:
       kind: 'quiz',
       id: 'ai-tok-output-cost',
       topic: 'ai-tokens',
-      prompt: 'Per token removed, which change usually saves the most money?',
+      prompt: 'In a single request, which change saves the most money per token removed?',
       options: [
         'Writing the prompt in lower case',
         'Asking for a shorter answer, because output tokens are priced several times higher than input tokens',

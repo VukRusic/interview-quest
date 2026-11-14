@@ -125,6 +125,14 @@ export function eventMetrics(sc: Scenario, arch: Architecture): Metrics[] {
   return sc.events.map((e) => simulate(arch, { ...sc.baseLoad, ...e.load }));
 }
 
+/** What to tell someone who added app servers that receive no traffic, or null if all of them serve. */
+export function idleAppHint(sc: Pick<Scenario, 'palette'>, arch: Architecture): string | null {
+  if (arch.app <= 1 || arch.lb > 0) return null;
+  return sc.palette.includes('lb')
+    ? 'Extra app servers need a load balancer to receive traffic.'
+    : 'Only one app server receives traffic here, so extra ones add cost but no capacity.';
+}
+
 /** Every event meets the SLO within budget. */
 export function solves(sc: Scenario, arch: Architecture): boolean {
   return eventMetrics(sc, arch).every((m) => meetsSlo(m, sc.slo));

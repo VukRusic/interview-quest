@@ -44,7 +44,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     id: 'flash-sale',
     title: 'The flash sale',
     story:
-      'A shop runs one app server, a cache and one database. A one-hour flash sale starts tonight: about 10× the traffic, and half of it is people placing orders. During the last sale an app server crashed halfway through. Keep the shop fast and taking orders through the whole sale, even if a server dies, for at most $290 a month.',
+      'A shop runs one app server, a cache and one database. A flash sale starts tonight and opens with a ten-minute order rush: about 10× the traffic, and half of it is people placing orders. During the last sale an app server crashed halfway through. Keep the shop fast and taking orders through the rush, even if a server dies, for at most $290 a month.',
     start: arch({ app: 1, cache: 1, db: 1 }),
     palette: ['lb', 'app', 'queue', 'cache', 'replica'],
     baseLoad: { rps: 300, readRatio: 0.5, staticRatio: 0 },
@@ -55,6 +55,6 @@ export const SCENARIOS: Record<string, Scenario> = {
     ],
     slo: { p95Ms: 300, errorRate: 0.01, budget: 290 },
     lesson:
-      'Two different problems, two different fixes. The app tier needed more servers, and extra servers only help behind a load balancer, which spreads requests and stops sending them to a server that has died. That is also why you need one more server than the sale itself requires. The database could not take the burst of orders, and a cache or a replica does not help with writes. A queue accepts each order straight away and lets the database work through them at a pace it can hold. The cost is that an order is confirmed a little later, and in a real system you would watch how long that backlog gets.',
+      'Two different problems, two different fixes. The app tier needed more servers, and extra servers only help behind a load balancer, which spreads requests and stops sending them to a server that has died. That is also why you need one more server than the sale itself requires. The database could not take the burst of orders, and a cache or a replica does not help with writes. A queue accepts each order straight away and lets the database work through them at a pace it can hold. The cost is that orders are confirmed later, not instantly: the backlog keeps draining after the rush ends. In a real system you would watch how long it gets and add workers until that wait is acceptable.',
   },
 };

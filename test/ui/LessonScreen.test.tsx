@@ -94,6 +94,23 @@ describe('the daily limit on the lesson route', () => {
     expect(screen.getByText('Prompt c-q')).toBeInTheDocument();
   });
 
+  test('a held notice does not outlive its day: the lesson opens once the date moves on', () => {
+    const { rerenderOn } = at('c', { a: '2026-11-10', b: '2026-11-10' });
+    expect(screen.getByRole('heading', { name: 'Opens tomorrow' })).toBeInTheDocument();
+    rerenderOn('2026-11-11');
+    expect(screen.queryByRole('heading', { name: 'Opens tomorrow' })).toBeNull();
+    expect(screen.getByText('Prompt c-q')).toBeInTheDocument();
+  });
+
+  test('a lesson open across midnight can be finished and counts toward the new day', async () => {
+    const { storage, rerenderOn } = at('c', { a: '2026-11-09', b: '2026-11-09' });
+    rerenderOn('2026-11-11');
+    await userEvent.click(screen.getByRole('button', { name: 'A' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(screen.getByText(/lesson complete/i)).toBeInTheDocument();
+    expect(loadProgress(storage).completed.c).toBe('2026-11-11');
+  });
+
   test('finishing the second lesson of the day shows its completion screen, not the held notice', async () => {
     at('b', { a: '2026-11-10' });
     await userEvent.click(screen.getByRole('button', { name: 'A' }));

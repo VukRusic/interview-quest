@@ -1,4 +1,4 @@
-import { simulate, emptyArch, meetsSlo, solves, type Architecture, type Load } from '../../src/core/sandbox';
+import { idleAppHint, simulate, emptyArch, meetsSlo, solves, type Architecture, type Load } from '../../src/core/sandbox';
 import { COMPONENTS, SCENARIOS } from '../../src/content/scenarios';
 
 const arch = (p: Partial<Architecture>): Architecture => ({ ...emptyArch(), app: 1, db: 1, ...p });
@@ -143,5 +143,17 @@ describe('Unit 2 scenario "flash-sale"', () => {
   });
   test('the palette only offers pieces the scenario needs or tempts with', () => {
     expect(sc.palette).toEqual(['lb', 'app', 'queue', 'cache', 'replica']);
+  });
+});
+
+describe('hint for app servers that receive no traffic', () => {
+  test('no hint with one server, or with a load balancer', () => {
+    expect(idleAppHint(SCENARIOS['flash-sale'], arch({ app: 1 }))).toBeNull();
+    expect(idleAppHint(SCENARIOS['flash-sale'], arch({ app: 3, lb: 1 }))).toBeNull();
+  });
+  test('points at the load balancer only where the scenario offers one', () => {
+    expect(idleAppHint(SCENARIOS['flash-sale'], arch({ app: 2 }))).toBe('Extra app servers need a load balancer to receive traffic.');
+    const unit1 = idleAppHint(SCENARIOS['slow-product-page'], arch({ app: 2 }));
+    expect(unit1).toBe('Only one app server receives traffic here, so extra ones add cost but no capacity.');
   });
 });
