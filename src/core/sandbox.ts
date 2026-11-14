@@ -69,12 +69,14 @@ export function simulate(arch: Architecture, load: Load): Metrics {
   let replicaLoad: number;
   if (load.dbDown) {
     primaryLoad = 0;
+    // With a queue, writes wait until the primary is back instead of failing.
+    const lostWrites = arch.queue > 0 ? 0 : writes;
     if (arch.replica > 0) {
       replicaLoad = reads;
-      failed += writes;
+      failed += lostWrites;
     } else {
       replicaLoad = 0;
-      failed += reads + writes;
+      failed += reads + lostWrites;
     }
   } else {
     const share = reads / (1 + arch.replica);

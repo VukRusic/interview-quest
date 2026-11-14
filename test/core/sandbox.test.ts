@@ -157,3 +157,59 @@ describe('hint for app servers that receive no traffic', () => {
     expect(unit1).toBe('Only one app server receives traffic here, so extra ones add cost but no capacity.');
   });
 });
+
+describe('a queue holds writes while the primary is down', () => {
+  const rush: Load = { rps: 1000, readRatio: 0.9, staticRatio: 0, dbDown: true };
+  test('primary down, replica but no queue: the writes fail (unchanged)', () => {
+    expect(simulate(arch({ replica: 2 }), rush).errorRate).toBeCloseTo(0.1);
+  });
+  test('primary down with a replica and a queue: writes wait instead of failing', () => {
+    expect(simulate(arch({ replica: 2, queue: 1 }), rush).errorRate).toBe(0);
+  });
+  test('primary down with a queue but no replica: reads still fail', () => {
+    expect(simulate(arch({ queue: 1 }), rush).errorRate).toBeCloseTo(0.9);
+  });
+  test('the earlier scenarios still solve with their known answers', () => {
+    const u1 = SCENARIOS['slow-product-page'];
+    const u2 = SCENARIOS['flash-sale'];
+    expect(solves(u1, { ...u1.start, cache: 1, replica: 1 })).toBe(true);
+    expect(solves(u2, { ...u2.start, lb: 1, queue: 1, app: 3 })).toBe(true);
+  });
+});
+
+describe('Unit 3 scenario "dashboard-rush"', () => {
+  const sc = SCENARIOS['dashboard-rush'];
+  const at = (a: Architecture, i: number) => simulate(a, { ...sc.baseLoad, ...sc.events[i].load });
+  const [NORMAL, RUSH, IMPORT, OUTAGE] = [0, 1, 2, 3];
+
+  test('four events in the planned order; the last is the rush with the primary down', () => {
+    expect(sc.events).toHaveLength(4);
+    expect(sc.events[OUTAGE].load).toEqual({ ...sc.events[RUSH].load, dbDown: true });
+    const imp = { ...sc.baseLoad, ...sc.events[IMPORT].load };
+    expect(imp.readRatio).toBeLessThan(0.5);
+  });
+  test('the start architecture passes normal traffic and fails the rush', () => {
+    expect(meetsSlo(at(sc.start, NORMAL), sc.slo)).toBe(true);
+    expect(meetsSlo(at(sc.start, RUSH), sc.slo)).toBe(false);
+  });
+  test('three replicas without a queue pass the rush and fail the import', () => {
+    const a = { ...sc.start, replica: 3 };
+    expect(meetsSlo(at(a, RUSH), sc.slo)).toBe(true);
+    expect(meetsSlo(at(a, IMPORT), sc.slo)).toBe(false);
+  });
+  test('three replicas without a queue also lose writes in the outage', () => {
+    expect(meetsSlo(at({ ...sc.start, replica: 3 }, OUTAGE), sc.slo)).toBe(false);
+  });
+  test('a queue with two replicas is not enough', () => {
+    expect(solves(sc, { ...sc.start, replica: 2, queue: 1 })).toBe(false);
+  });
+  test('three replicas and a queue solve every event within budget', () => {
+    expect(solves(sc, { ...sc.start, replica: 3, queue: 1 })).toBe(true);
+  });
+  test('adding a load balancer and a second app server to the solution is over budget', () => {
+    expect(solves(sc, { ...sc.start, replica: 3, queue: 1, lb: 1, app: 2 })).toBe(false);
+  });
+  test('the palette is replica, queue, app, lb', () => {
+    expect(sc.palette).toEqual(['replica', 'queue', 'app', 'lb']);
+  });
+});
