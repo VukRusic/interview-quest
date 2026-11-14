@@ -190,3 +190,15 @@ Same rules as before. Visuals and sandbox numbers are illustrative; check that w
 - [ ] `hm-which-set`
 - [ ] `hm-which-not`
 - [ ] `py-two-sum` (prompt, 8 tests, reference, 12 walkthrough frames)
+
+## talk-data-stores (lesson, talk)
+- [ ] explain: "The stores people name in design rounds"
+- [ ] `tt-redis-as-store`
+- [ ] `tt-document-db`
+- [ ] `tt-object-storage`
+- [ ] `tt-wide-column`
+- [ ] `tt-time-series`
+- [ ] `tt-inverted-index`
+- [ ] `tt-oltp-olap`
+- [ ] `tt-vector-search`
+- [ ] `tt-change-data-capture`

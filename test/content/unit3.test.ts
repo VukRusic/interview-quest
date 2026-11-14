@@ -119,3 +119,35 @@ describe('practice lessons', () => {
     }
   });
 });
+
+describe('tech talk deck: data stores', () => {
+  const cards = () => lesson('talk-data-stores').steps.flatMap((s) => (s.kind === 'quiz' ? [s] : []));
+
+  test('one short intro and nine cards, five on storage and four on search and analytics', () => {
+    const steps = lesson('talk-data-stores').steps;
+    expect(steps[0].kind).toBe('explain');
+    expect(steps.slice(1).every((s) => s.kind === 'quiz')).toBe(true);
+    expect(cards()).toHaveLength(9);
+    const by: Record<string, number> = {};
+    for (const c of cards()) by[c.topic] = (by[c.topic] ?? 0) + 1;
+    expect(by).toEqual({ 'talk-storage': 5, 'talk-search-analytics': 4 });
+  });
+
+  test('every card has a tt- id, at least three options, a real explanation and a look-up phrase', () => {
+    for (const c of cards()) {
+      expect(c.id.startsWith('tt-'), c.id).toBe(true);
+      expect(c.options.length, c.id).toBeGreaterThanOrEqual(3);
+      expect(c.why.length, c.id).toBeGreaterThan(80);
+      expect(c.lookUp, c.id).toBeTruthy();
+    }
+  });
+
+  test('look-up phrases are unique across every unit', () => {
+    const all = UNITS.flatMap((u) => u.lessons.flatMap((l) => l.steps)).flatMap((s) => (s.kind === 'quiz' && s.lookUp ? [s.lookUp] : []));
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  test('the right answer is not always in the same position', () => {
+    expect(new Set(cards().map((c) => c.answer)).size).toBeGreaterThanOrEqual(3);
+  });
+});
