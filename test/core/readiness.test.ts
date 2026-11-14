@@ -127,3 +127,29 @@ test('the Milestone 1 export never reads lower under the new formula', async () 
   expect(readiness('design-flow', p)).toBeCloseTo(1.5 / 4.5);
   expect(readiness('behavioural', p)).toBe(0);
 });
+
+describe('prompt steps are self-graded', () => {
+  const pr = (id: string, topic: string) => ({ kind: 'prompt', id, topic, brief: 'b', budget: 100, rubric: ['r'] });
+  const idx = indexItems([
+    UnitSchema.parse({
+      id: 'u',
+      title: 'U',
+      lessons: [{ id: 'l', title: 'L', pillar: 'ai', slot: 'lesson', steps: [pr('p1', 'only'), pr('p2', 'mix'), q('mq', 'mix')] }],
+    }),
+  ]);
+
+  test('a top grade on a prompt-only topic reads 1', () => {
+    expect(readiness('only', { ...base, selfGrades: { p1: 1 } }, idx)).toBe(1);
+  });
+  test('a prompt step counts half next to a quiz in the same topic', () => {
+    expect(readiness('mix', { ...base, srs: { mq: srs('mq', 4) } }, idx)).toBeCloseTo(1 / 1.5);
+    expect(readiness('mix', { ...base, selfGrades: { p2: 1 } }, idx)).toBeCloseTo(0.5 / 1.5);
+  });
+  test('practised counts a graded prompt step, not an srs entry under its id', () => {
+    expect(practised('only', { ...base, selfGrades: { p1: 0 } }, idx)).toBe(1);
+    expect(practised('only', { ...base, srs: { p1: srs('p1', 2) } }, idx)).toBe(0);
+  });
+  test('a self-grade under an id that is not in the content is ignored', () => {
+    expect(readiness('only', { ...base, selfGrades: { gone: 1 } }, idx)).toBe(0);
+  });
+});

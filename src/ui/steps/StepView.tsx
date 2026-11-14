@@ -25,5 +25,7 @@ export function StepView({ step, onDone }: { step: Step; onDone: (r?: StepResult
       return <MockStep step={step} onDone={onDone} />;
     case 'story':
       return <StoryStep step={step} onDone={onDone} />;
+    case 'prompt':
+      return null;
   }
 }

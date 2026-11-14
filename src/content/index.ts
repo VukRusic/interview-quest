@@ -1,3 +1,4 @@
+import { estimateTokens } from '../core/tokens';
 import type { ItemStep, Unit } from './types';
 import { unit1 } from './unit1';
 import { unit2 } from './unit2';
@@ -43,6 +44,8 @@ export function validateContent(units: Unit[]): string[] {
         check(s.id, `step in ${l.id}`);
         if ((s.kind === 'quiz' || s.kind === 'bug') && (s.answer < 0 || s.answer >= s.options.length))
           errors.push(`${s.id}: answer ${s.answer} out of range for ${s.options.length} options`);
+        if (s.kind === 'prompt' && s.material !== undefined && estimateTokens(s.material) <= s.budget)
+          errors.push(`${s.id}: material already fits the budget`);
         if (s.kind === 'bug') {
           const lines = s.code.split('\n').length;
           const bad = s.bugLines.filter((n) => n < 1 || n > lines);

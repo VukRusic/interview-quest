@@ -1,5 +1,5 @@
 import { indexItems } from '../content/index';
-import type { Pillar, Unit } from '../content/types';
+import { isSelfKind, type Pillar, type Unit } from '../content/types';
 import { practised, readiness } from '../core/readiness';
 import { isLearned } from '../core/srs';
 import { useProgress } from '../state/useProgress';
@@ -31,10 +31,7 @@ export function ReadinessMap({ units }: { units: Unit[] }) {
           <ul>
             {[...topics].map(([topic, ids]) => {
               const r = readiness(topic, progress, items);
-              const isSelf = (id: string) => {
-                const k = items.get(id)?.step.kind;
-                return k === 'mock' || k === 'story';
-              };
+              const isSelf = (id: string) => isSelfKind(items.get(id)?.step.kind ?? '');
               const auto = ids.filter((id) => !isSelf(id));
               const self = ids.filter(isSelf);
               const learned = auto.filter((id) => progress.srs[id] && isLearned(progress.srs[id])).length;
