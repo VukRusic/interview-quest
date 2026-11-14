@@ -179,3 +179,63 @@ describe('.NET async lesson', () => {
       if (/ASP\.NET Core/.test(s) && /deadlocks?\b/i.test(s)) expect(s, s).toMatch(/\bno\b|\bnot\b|n't/i);
   });
 });
+
+describe('prompt-budget lesson, mock interview and story', () => {
+  test('ai-prompt-budget: an explanation, two questions, then the prompt exercise', () => {
+    const steps = lesson('ai-prompt-budget').steps;
+    expect(steps.map((s) => s.kind)).toEqual(['explain', 'quiz', 'quiz', 'prompt']);
+    for (const q of kinds('ai-prompt-budget', 'quiz')) expect(q.kind === 'quiz' && q.id.startsWith('ai-prm-')).toBe(true);
+  });
+
+  test('the exercise has a 350-token budget, the six rubric lines and notes that are too long to paste', () => {
+    const p = item('prompt-support-reply');
+    if (p.kind !== 'prompt') throw new Error('not a prompt step');
+    expect(p.topic).toBe('ai-prompts');
+    expect(p.budget).toBe(350);
+    expect(p.rubric).toEqual([
+      'Says who the assistant is replying as, and to whom',
+      'States the task in one or two sentences',
+      'Includes the policy facts a reply needs, and leaves the rest out',
+      'Says what to do when the answer is not in those facts: hand over to a person, never guess',
+      'Specifies the reply’s length, tone and format',
+      'No repeated instructions or filler',
+    ]);
+    const size = estimateTokens(p.material ?? '');
+    expect(size).toBeGreaterThanOrEqual(600);
+    expect(size).toBeLessThanOrEqual(900);
+    expect(p.material).toMatch(/30 days/);
+    expect(p.material).toMatch(/team lead/);
+  });
+
+  test('ai-prompt-budget names no prices, model ids or window sizes that would go stale', () => {
+    const l = lesson('ai-prompt-budget');
+    const own = JSON.stringify({ ...l, steps: l.steps.map((s) => (s.kind === 'prompt' ? { ...s, material: '' } : s)) });
+    expect(own).not.toMatch(/\$\d|claude-|\d+k tokens|\d{3},\d{3}|opus|sonnet|haiku|gpt/i);
+  });
+
+  test('the news-feed mock has five follow-ups and a rubric of six to eight lines that uses this unit', () => {
+    const steps = lesson('mock-news-feed').steps;
+    expect(steps).toHaveLength(1);
+    const m = steps[0];
+    expect(m.kind === 'mock' && m.id).toBe('mock-feed');
+    if (m.kind !== 'mock') return;
+    expect(m.topic).toBe('design-feed');
+    expect(m.followUps).toHaveLength(5);
+    expect(m.rubric.length).toBeGreaterThanOrEqual(6);
+    expect(m.rubric.length).toBeLessThanOrEqual(8);
+    expect(m.rubric.join(' ')).toMatch(/replication|consistency/i);
+    expect(m.rubric.join(' ')).toMatch(/cursor/i);
+  });
+
+  test('the trade-off story has a prompt and at least three generic hints', () => {
+    const s = lesson('story-tradeoff').steps[0];
+    expect(s.kind === 'story' && s.id).toBe('story-argued-tradeoff');
+    if (s.kind !== 'story') return;
+    expect(s.topic).toBe('behavioural');
+    expect(s.hints.length).toBeGreaterThanOrEqual(3);
+  });
+
+  test('no lesson is still a placeholder', () => {
+    expect(text).not.toMatch(/coming soon/i);
+  });
+});

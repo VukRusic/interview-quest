@@ -211,3 +211,16 @@ Same rules as before. Visuals and sandbox numbers are illustrative; check that w
 - [ ] `net-when-all`
 - [ ] `net-configure-await`
 - [ ] `bug-sync-over-async` (C#)
+
+## ai-prompt-budget (lesson, ai)
+Uses the same facts checked for `ai-tokens`. No prices, model names or window sizes.
+- [ ] explain: "What a prompt needs, and what it can lose"
+- [ ] `ai-prm-unknown`
+- [ ] `ai-prm-cut-first`
+- [ ] `prompt-support-reply` (brief, 350-token budget, six rubric lines; the Fernhill Outdoor notes are invented and deliberately contain noise and repetition)
+
+## mock-news-feed (extra, design)
+- [ ] `mock-feed` (prompt, 5 follow-ups, 8 rubric items)
+
+## story-tradeoff (extra, stories)
+- [ ] `story-argued-tradeoff` (prompt and hints only; the owner's answers live in the browser, never here)
