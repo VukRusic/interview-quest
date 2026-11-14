@@ -202,3 +202,12 @@ Same rules as before. Visuals and sandbox numbers are illustrative; check that w
 - [ ] `tt-oltp-olap`
 - [ ] `tt-vector-search`
 - [ ] `tt-change-data-capture`
+
+## dotnet-async (lesson, stack)
+- [ ] explain: "What await gives back" (+ AwaitThreads visual)
+- [ ] explain: "The four things interviewers ask about" (starvation in ASP.NET Core vs deadlock under a synchronisation context; ConfigureAwait)
+- [ ] `net-await-thread`
+- [ ] `net-result-starvation`
+- [ ] `net-when-all`
+- [ ] `net-configure-await`
+- [ ] `bug-sync-over-async` (C#)

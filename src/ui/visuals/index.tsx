@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { AwaitThreads } from './AwaitThreads';
 import { CacheFlow } from './CacheFlow';
 import { DesignFlow } from './DesignFlow';
 import { DataShapes } from './DataShapes';
@@ -27,4 +28,5 @@ export const VISUALS: Record<string, FC> = {
   'shard-keys': ShardKeys,
   quorum: Quorum,
   'hash-lookup': HashLookup,
+  'await-threads': AwaitThreads,
 };

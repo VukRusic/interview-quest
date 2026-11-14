@@ -1000,3 +1000,12 @@ h1 .sprite {
 .quorum-verdict.is-wrong strong {
   color: var(--bad);
 }
+
+.thread-pool {
+  grid-template-columns: repeat(4, 1fr);
+}
+@media (max-width: 560px) {
+  .thread-pool {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

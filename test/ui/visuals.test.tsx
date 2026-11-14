@@ -199,3 +199,20 @@ describe('hash-lookup', () => {
     expect(screen.getByText(/positions 3 and 4/)).toBeInTheDocument();
   });
 });
+
+describe('await-threads', () => {
+  test('blocking handles four requests at a time; async has them all in flight and finishes sooner', async () => {
+    show('await-threads');
+    expect(stat('All 8 requests finished after')).toBe('2 s');
+    expect(stat('Threads sitting idle, blocked')).toBe('4');
+    await userEvent.click(screen.getByRole('checkbox', { name: /async/i }));
+    expect(stat('All 8 requests finished after')).toBe('1 s');
+    expect(stat('Threads sitting idle, blocked')).toBe('0');
+  });
+
+  test('more requests make blocking slower and leave async the same', () => {
+    show('await-threads');
+    fireEvent.change(screen.getByRole('slider', { name: /requests arriving/i }), { target: { value: '32' } });
+    expect(stat('All 32 requests finished after')).toBe('8 s');
+  });
+});

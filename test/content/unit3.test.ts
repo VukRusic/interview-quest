@@ -151,3 +151,31 @@ describe('tech talk deck: data stores', () => {
     expect(new Set(cards().map((c) => c.answer)).size).toBeGreaterThanOrEqual(3);
   });
 });
+
+describe('.NET async lesson', () => {
+  test('opens with its visual, then exactly four questions and one C# bug card last', () => {
+    const steps = lesson('dotnet-async').steps;
+    const first = steps[0];
+    expect(first.kind === 'explain' && first.visual).toBe('await-threads');
+    expect(kinds('dotnet-async', 'quiz')).toHaveLength(4);
+    const last = steps[steps.length - 1];
+    expect(last.kind === 'bug' && `${last.id}:${last.lang}`).toBe('bug-sync-over-async:csharp');
+    expect(kinds('dotnet-async', 'bug')).toHaveLength(1);
+  });
+
+  test('blocking in ASP.NET Core is called starvation, never a deadlock', () => {
+    const bug = item('bug-sync-over-async');
+    if (bug.kind !== 'bug') throw new Error('not a bug');
+    expect(bug.why).toMatch(/starv/i);
+    const strings: string[] = [];
+    for (const s of lesson('dotnet-async').steps) {
+      if (s.kind === 'explain') strings.push(s.body);
+      if (s.kind === 'quiz') strings.push(s.prompt, s.why, ...s.options);
+      if (s.kind === 'bug') strings.push(s.why, s.fix, ...s.options);
+    }
+    const sentences = strings.flatMap((t) => t.split(/(?<=[.!?:])\s+/));
+    expect(sentences.some((s) => /ASP\.NET Core/.test(s))).toBe(true);
+    for (const s of sentences)
+      if (/ASP\.NET Core/.test(s) && /deadlocks?\b/i.test(s)) expect(s, s).toMatch(/\bno\b|\bnot\b|n't/i);
+  });
+});
