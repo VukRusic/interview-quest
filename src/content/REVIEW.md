@@ -138,3 +138,7 @@ Checked against Anthropic's API reference on 2026-11-13. Kept to what holds acro
 
 ## story-production-incident (extra, stories)
 - [ ] `story-incident` (prompt and hints only; the owner's answers live in the browser, never here)
+
+# Unit 3: Data at scale
+
+Same rules as before. Visuals and sandbox numbers are illustrative; check that what they *teach* is right.

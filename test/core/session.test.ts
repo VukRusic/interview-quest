@@ -158,3 +158,29 @@ describe('re-solve: full problems come back occasionally', () => {
     expect(buildSession([probUnit], p, T).resolve).toBe('py');
   });
 });
+
+describe('a new unit arriving for someone mid-way through the previous one', () => {
+  const day = (d: number) => `2026-11-${String(d).padStart(2, '0')}`;
+  async function real(doneCount: number) {
+    const { UNITS } = await import('../../src/content/index');
+    const path = UNITS.flatMap((u) => u.lessons.map((l) => l.id));
+    const completed = Object.fromEntries(path.slice(0, doneCount).map((id, i) => [id, day(1 + Math.floor(i / 2))]));
+    const p = withCompleted(completed);
+    return { UNITS, path, p, s: buildSession(UNITS, p, '2026-11-20') };
+  }
+
+  test('with Unit 2 half done, Unit 3 lessons are not offered and read "later"', async () => {
+    const { UNITS, p, s } = await real(13);
+    const unit3 = UNITS[2].lessons.map((l) => l.id);
+    expect(unit3.length).toBe(11);
+    for (const id of unit3) {
+      expect(s.lessons).not.toContain(id);
+      expect(lessonAccess(s, p, id)).toBe('later');
+    }
+  });
+
+  test('the daily two can be the last lesson of Unit 2 and the first of Unit 3', async () => {
+    const { s } = await real(17);
+    expect(s.lessons).toEqual(['story-production-incident', 'sql-vs-nosql']);
+  });
+});
