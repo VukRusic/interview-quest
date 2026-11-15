@@ -915,3 +915,102 @@ h1 .sprite {
 .tok-reply {
   background: var(--bad);
 }
+
+/* Prompt exercise */
+.prompt-material h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.prompt-notes {
+  max-height: 14rem;
+  overflow-y: auto;
+  padding: var(--space-3);
+  border: 2px solid var(--line);
+  background: var(--surface-2);
+  font-size: 0.92rem;
+}
+.prompt-notes p {
+  margin: 0;
+}
+.prompt-notes p + p {
+  margin-top: var(--space-2);
+}
+.budget-bar {
+  height: 14px;
+  border: var(--px) solid var(--ink);
+  background: var(--surface-2);
+}
+.budget-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--pine);
+}
+.budget.is-over .budget-bar > span {
+  background: var(--bad);
+}
+.budget-text {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.budget-over {
+  color: var(--bad);
+}
+.budget-result {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+}
+.budget-result.is-right > span:first-child {
+  color: var(--pine);
+}
+.budget-result.is-wrong > span:first-child {
+  color: var(--bad);
+}
+
+/* Unit 3 visuals */
+.shape-data {
+  margin: 0;
+  padding: var(--space-3);
+  border: 2px solid var(--line);
+  background: var(--surface-2);
+  font-family: var(--font-code);
+  font-size: 0.78rem;
+  overflow-x: auto;
+  white-space: pre;
+}
+.viz .btn[aria-pressed='true'] {
+  background: var(--sun-soft);
+}
+.viz-stats .stat-text {
+  font-size: 0.85rem;
+}
+.shard-dots {
+  color: var(--sun);
+  letter-spacing: 1px;
+  word-break: break-all;
+  line-height: 1;
+}
+.quorum-verdict.is-right strong {
+  color: var(--pine);
+}
+.quorum-verdict.is-wrong strong {
+  color: var(--bad);
+}
+
+.thread-pool {
+  grid-template-columns: repeat(4, 1fr);
+}
+@media (max-width: 560px) {
+  .thread-pool {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.prompt-brief {
+  margin: 0;
+  font-weight: 700;
+}

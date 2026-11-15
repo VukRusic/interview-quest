@@ -82,6 +82,20 @@ export const StoryStepSchema = z.object({
   hints: z.array(z.string()),
 });
 
+/** Write a prompt inside a token budget. Self-graded against the rubric; the budget line grades itself. */
+export const PromptStepSchema = z.object({
+  kind: z.literal('prompt'),
+  id: z.string(),
+  topic: z.string(),
+  /** The task, as an interviewer would give it. */
+  brief: z.string(),
+  /** Source notes the writer has to choose from. Must be larger than the budget. */
+  material: z.string().optional(),
+  /** Tokens. */
+  budget: z.number().int().min(50),
+  rubric: z.array(z.string()).min(1),
+});
+
 export const StepSchema = z.discriminatedUnion('kind', [
   ExplainStepSchema,
   QuizStepSchema,
@@ -90,6 +104,7 @@ export const StepSchema = z.discriminatedUnion('kind', [
   SandboxStepSchema,
   MockStepSchema,
   StoryStepSchema,
+  PromptStepSchema,
 ]);
 
 export const LessonSchema = z.object({
@@ -113,11 +128,14 @@ export type PythonStep = z.infer<typeof PythonStepSchema>;
 export type SandboxStep = z.infer<typeof SandboxStepSchema>;
 export type MockStep = z.infer<typeof MockStepSchema>;
 export type StoryStep = z.infer<typeof StoryStepSchema>;
+export type PromptStep = z.infer<typeof PromptStepSchema>;
 export type Step = z.infer<typeof StepSchema>;
 export type ItemStep = Exclude<Step, ExplainStep>;
 export type Lesson = z.infer<typeof LessonSchema>;
 export type Unit = z.infer<typeof UnitSchema>;
 
 export const AUTO_KINDS = ['quiz', 'bug', 'python', 'sandbox'] as const;
-export const SELF_KINDS = ['mock', 'story'] as const;
+export const SELF_KINDS = ['mock', 'story', 'prompt'] as const;
+/** Graded by the learner against a rubric, so it counts at half weight. */
+export const isSelfKind = (kind: string): boolean => (SELF_KINDS as readonly string[]).includes(kind);
 export const REVIEWABLE_KINDS = ['quiz', 'bug'] as const;

@@ -57,4 +57,22 @@ export const SCENARIOS: Record<string, Scenario> = {
     lesson:
       'Two different problems, two different fixes. The app tier needed more servers, and extra servers only help behind a load balancer, which spreads requests and stops sending them to a server that has died. That is also why you need one more server than the sale itself requires. The database could not take the burst of orders, and a cache or a replica does not help with writes. A queue accepts each order straight away and lets the database work through them at a pace it can hold. The cost is that orders are confirmed later, not instantly: the backlog keeps draining after the rush ends. In a real system you would watch how long it gets and add workers until that wait is acceptable.',
   },
+  'dashboard-rush': {
+    id: 'dashboard-rush',
+    title: 'The Monday dashboard',
+    story:
+      'A reporting product runs on one app server and one database. Every Monday at 9:00 all customers open their dashboards at once, and every dashboard runs its own queries, so a cache barely helps. Each night a data import writes a large batch of new rows. Last month the primary database also failed during the Monday rush. Keep dashboards fast, keep accepting the import and new writes through an outage, and stay within $400 a month.',
+    start: arch({ app: 1, db: 1 }),
+    palette: ['replica', 'queue', 'app', 'lb'],
+    baseLoad: { rps: 400, readRatio: 0.9, staticRatio: 0 },
+    events: [
+      { label: 'Normal traffic', load: {} },
+      { label: 'Monday 9:00, everyone opens dashboards', load: { rps: 2000, readRatio: 0.95 } },
+      { label: 'Nightly data import', load: { rps: 1500, readRatio: 0.2 } },
+      { label: 'Primary fails during the Monday rush', load: { rps: 2000, readRatio: 0.95, dbDown: true } },
+    ],
+    slo: { p95Ms: 300, errorRate: 0.01, budget: 400 },
+    lesson:
+      'Reads and writes needed different fixes again. Read replicas multiply how many dashboard queries you can answer, and they keep answering when the primary dies. They do nothing for the import, because every write still goes to the one primary. The queue lets the import arrive as fast as it likes while the database takes rows at a pace it can hold, and during the outage it holds new writes until a replica is promoted. This model is kinder than real life in one way: with asynchronous replication, the last few writes the old primary confirmed may not have reached a replica, and those are lost in a failover. The price of replicas is lag: a dashboard may show data that is a moment behind the primary, which is fine for a report and would not be for an account balance.',
+  },
 };

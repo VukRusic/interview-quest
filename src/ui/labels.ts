@@ -22,6 +22,16 @@ const TOPIC_LABELS: Record<string, string> = {
   'talk-reliability': 'Tech talk: reliability',
   'ai-tokens': 'Tokens and context',
   'design-notifications': 'Notification system',
+  'data-modelling': 'Choosing a database',
+  replication: 'Replication',
+  sharding: 'Sharding',
+  consistency: 'Consistency',
+  'talk-storage': 'Tech talk: storage',
+  'talk-search-analytics': 'Tech talk: search and analytics',
+  'hash-map': 'Hash maps',
+  'dotnet-async': '.NET async',
+  'ai-prompts': 'Writing prompts',
+  'design-feed': 'News feed',
 };
 
 export const topicLabel = (t: string) => TOPIC_LABELS[t] ?? t.replace(/-/g, ' ');

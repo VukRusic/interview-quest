@@ -6,6 +6,7 @@ import { PythonStep } from './PythonStep';
 import { SandboxStep } from './SandboxStep';
 import { MockStep } from './MockStep';
 import { StoryStep } from './StoryStep';
+import { PromptStep } from './PromptStep';
 import type { StepResult } from './types';
 
 /** Renders any step kind. Each kind's component owns its own interaction. */
@@ -25,5 +26,7 @@ export function StepView({ step, onDone }: { step: Step; onDone: (r?: StepResult
       return <MockStep step={step} onDone={onDone} />;
     case 'story':
       return <StoryStep step={step} onDone={onDone} />;
+    case 'prompt':
+      return <PromptStep step={step} onDone={onDone} />;
   }
 }

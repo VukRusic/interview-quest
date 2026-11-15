@@ -1,0 +1,153 @@
+/** Unit 3 tech talk deck. Validated when unit3.ts assembles the unit. */
+
+const card = (
+  id: string,
+  topic: string,
+  prompt: string,
+  options: string[],
+  answer: number,
+  why: string,
+  lookUp: string,
+) => ({ kind: 'quiz', id, topic, prompt, options, answer, why, lookUp });
+
+export const talkDataStores = {
+  id: 'talk-data-stores',
+  title: 'Tech talk: data stores',
+  pillar: 'talk',
+  slot: 'lesson',
+  steps: [
+    {
+      kind: 'explain',
+      title: 'The stores people name in design rounds',
+      body: `After "which database?", interviewers often name a specific kind of store and see whether you know what it is for: "would you put that in Redis?", "where do the images go?", "how would you search that?"
+
+Nine cards. For each, pick what that store is built to do. One correct sentence and its main trade-off is all you need in the room; the look-up phrase is there for afterwards.`,
+    },
+    card(
+      'tt-redis-as-store',
+      'talk-storage',
+      '"We keep that in Redis." What should you check before treating Redis as the only place some data lives?',
+      [
+        'Whether it is set up to save to disk and replicate, and what it throws away when memory fills up',
+        'Whether its inverted index has been rebuilt',
+        'Whether the files are under the right bucket and key',
+        'Whether its columns are compressed for scans',
+      ],
+      0,
+      'Redis keeps data in memory, which is why it is fast. As a cache that is fine: if an entry disappears, you reload it from the database. As the only copy, you need to know that it persists to disk, replicates, and is not configured to evict keys under memory pressure. The other options belong to a search engine, object storage and a column store.',
+      'Redis persistence (RDB, AOF) and eviction policies',
+    ),
+    card(
+      'tt-document-db',
+      'talk-storage',
+      'What is a document database a good fit for?',
+      [
+        'Large files such as videos, fetched by a key',
+        'Measurements arriving every second, queried by time range',
+        'Records read and written as a whole, whose shape varies from one to the next, such as product listings with different attributes',
+        'Reports that add up one column across billions of rows',
+      ],
+      2,
+      'A document store keeps each record as one nested object, so a product with twelve attributes and another with three sit side by side without schema changes, and each is one read. It is weaker when you need to combine many records in new ways. The other options describe object storage, a time-series database and a column store.',
+      'document database modelling: embedding vs referencing',
+    ),
+    card(
+      'tt-object-storage',
+      'talk-storage',
+      'Why do uploaded images and videos go into object storage instead of the database?',
+      [
+        'It keeps the newest values in memory so reads take microseconds',
+        'It holds large files cheaply and durably and serves them over HTTP, while the database keeps only each file’s address and details',
+        'It indexes every word so files can be searched by their contents',
+        'It spreads writes across many nodes by a partition key',
+      ],
+      1,
+      'Object storage such as S3 is built for big, unchanging blobs: cheap per gigabyte, very durable, and reachable directly by browsers or a CDN. Putting files in the database bloats it, slows backups and makes every download pass through your servers. The other options describe a cache, a search engine and a wide-column store.',
+      'object storage, pre-signed URLs and CDN delivery',
+    ),
+    card(
+      'tt-wide-column',
+      'talk-storage',
+      'What is a wide-column store such as Cassandra built for?',
+      [
+        'Ad hoc queries with joins across many tables',
+        'Full-text search with ranking',
+        'Holding files of any size',
+        'Very high volumes of writes spread over many nodes, with rows found by a partition key designed around your queries',
+      ],
+      3,
+      'It scales writes almost linearly by adding nodes, and Cassandra has no single leader to fail. The cost is that you design tables around the exact queries you will run: rows are found by partition key, and joins or unplanned queries are not available. The other options describe a relational database, a search engine and object storage.',
+      'Cassandra modelling: partition key and clustering key',
+    ),
+    card(
+      'tt-time-series',
+      'talk-storage',
+      'What makes a time-series database different?',
+      [
+        'Every record is a self-contained nested document',
+        'It is tuned for data that arrives in time order and is read by time range: fast appends, heavy compression, and automatic roll-up or expiry of old data',
+        'It finds the nearest neighbours of a vector',
+        'It guarantees transactions across tables',
+      ],
+      1,
+      'Metrics and sensor readings are almost always appended in time order, rarely updated, and asked about as "the last hour" or "per minute over a week". A time-series database is built around exactly that, including keeping coarse summaries of old data in place of every point. The other options describe document, vector and relational stores.',
+      'time-series database downsampling and retention',
+    ),
+    card(
+      'tt-inverted-index',
+      'talk-search-analytics',
+      'How does a search engine such as Elasticsearch find documents containing a word so quickly?',
+      [
+        'It scans every document with a pattern match',
+        'It stores each column separately so scans read less',
+        'It keeps an inverted index: for each word, the list of documents that contain it',
+        'It compares vectors to find the closest meaning',
+      ],
+      2,
+      'Like the index at the back of a book, an inverted index goes from word to locations, so a search is a lookup, not a scan. It also supports ranking by relevance. In a design, the search engine is normally a second copy fed from the main database, a moment behind it, and never the source of truth.',
+      'inverted index and relevance scoring',
+    ),
+    card(
+      'tt-oltp-olap',
+      'talk-search-analytics',
+      'Why do analytics queries usually run on a separate column-based store and not on the main database?',
+      [
+        'A column store reads only the few columns a report needs across huge numbers of rows, and heavy reports no longer compete with the product’s own queries',
+        'It keeps hot keys in memory so repeated reads skip the database',
+        'It copies every change to followers so reads can be spread out',
+        'It splits rows across machines by a key',
+      ],
+      0,
+      'The main database is organised by row for many small reads and writes (OLTP). A report that sums one column over a billion rows (OLAP) would read every full row there and slow everything else down. A column store keeps each column together and compressed, which makes that kind of query fast. The other options describe a cache, replication and sharding.',
+      'OLTP vs OLAP and columnar storage',
+    ),
+    card(
+      'tt-vector-search',
+      'talk-search-analytics',
+      'What does a vector database or vector index do?',
+      [
+        'Finds documents that contain the exact words of the query',
+        'Stores each order as one nested record',
+        'Keeps measurements in time order and rolls up old ones',
+        'Stores embeddings, which are lists of numbers that capture meaning, and finds the items closest to a query’s embedding',
+      ],
+      3,
+      'An embedding model turns text or images into vectors in which similar meanings are close together. A vector index finds the nearest ones quickly, usually approximately. It is what "semantic search" and retrieval for language-model applications are built on, and it is often combined with ordinary keyword search, which is better at exact terms.',
+      'embeddings and approximate nearest neighbour search',
+    ),
+    card(
+      'tt-change-data-capture',
+      'talk-search-analytics',
+      'What is change data capture (CDC)?',
+      [
+        'Taking a full copy of the database every night',
+        'Reading the database’s own log of changes and publishing each one as an event, so other systems stay in step',
+        'Writing every change to two databases from application code',
+        'Recording who changed which row, for auditors',
+      ],
+      1,
+      'CDC follows the log the database already keeps and turns each committed change into an event for a search index, a cache or an analytics store. Because it starts from what was really committed, it avoids the trap of writing to two systems from the application, where one write can succeed and the other fail. The other options are a backup, a dual write and an audit trail.',
+      'change data capture and the outbox pattern',
+    ),
+  ],
+};

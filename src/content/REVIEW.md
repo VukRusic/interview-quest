@@ -138,3 +138,89 @@ Checked against Anthropic's API reference on 2026-11-13. Kept to what holds acro
 
 ## story-production-incident (extra, stories)
 - [ ] `story-incident` (prompt and hints only; the owner's answers live in the browser, never here)
+
+# Unit 3: Data at scale
+
+Same rules as before. Visuals and sandbox numbers are illustrative; check that what they *teach* is right.
+
+## sql-vs-nosql (lesson, design)
+- [ ] explain: "Shape the data for the questions you will ask" (+ DataShapes visual)
+- [ ] explain: "How to answer \"which database?\" in an interview"
+- [ ] `db-default`
+- [ ] `db-access-patterns`
+- [ ] `db-key-value-fit`
+- [ ] `db-transaction` (check the hedge about NoSQL transactions)
+- [ ] `db-several-stores`
+
+## replication (lesson, design)
+- [ ] explain: "One leader, several copies" (+ ReplicationLag visual)
+- [ ] explain: "What the delay costs you" (sync vs async, split brain, replica is not a backup)
+- [ ] `rep-what-for`
+- [ ] `rep-stale-read`
+- [ ] `rep-read-your-writes`
+- [ ] `rep-sync-trade-off`
+- [ ] `rep-split-brain`
+
+## sharding (lesson, design)
+- [ ] explain: "Splitting the data itself" (+ ShardKeys visual)
+- [ ] explain: "Why you shard late"
+- [ ] `shard-vs-replication`
+- [ ] `shard-hot`
+- [ ] `shard-range-query`
+- [ ] `shard-rebalance`
+- [ ] `shard-when`
+
+## consistency (lesson, design)
+- [ ] explain: "How current is a read?" (+ Quorum visual, R + W > N)
+- [ ] explain: "CAP, said correctly"
+- [ ] `cons-eventual`
+- [ ] `cons-cap`
+- [ ] `cons-quorum`
+- [ ] `cons-needs-strong`
+- [ ] `bug-read-after-write` (C#, EF Core)
+- [ ] `bug-lost-update` (Python; check the single-statement UPDATE fix)
+
+## dashboard-rush (practice, design)
+- [ ] explain: "Before you build"
+- [ ] `sandbox-dashboard-rush` (story, four events, SLO, budget and lesson text in `scenarios.ts`; rule that a queue holds writes while the primary is down)
+
+## hash-map (lesson, algo)
+- [ ] explain: "Remember what you have seen" (+ HashLookup visual)
+- [ ] `hm-which-group`
+- [ ] `hm-which-set`
+- [ ] `hm-which-not`
+- [ ] `py-two-sum` (prompt, 8 tests, reference, 12 walkthrough frames)
+
+## talk-data-stores (lesson, talk)
+- [ ] explain: "The stores people name in design rounds"
+- [ ] `tt-redis-as-store`
+- [ ] `tt-document-db`
+- [ ] `tt-object-storage`
+- [ ] `tt-wide-column`
+- [ ] `tt-time-series`
+- [ ] `tt-inverted-index`
+- [ ] `tt-oltp-olap`
+- [ ] `tt-vector-search`
+- [ ] `tt-change-data-capture`
+
+## dotnet-async (lesson, stack)
+- [ ] explain: "What await gives back" (+ AwaitThreads visual)
+- [ ] explain: "The four things interviewers ask about" (starvation in ASP.NET Core vs deadlock under a synchronisation context; ConfigureAwait)
+- [ ] `net-await-thread`
+- [ ] `net-result-starvation`
+- [ ] `net-when-all`
+- [ ] `net-configure-await`
+- [ ] `bug-sync-over-async` (C#)
+
+## ai-prompt-budget (lesson, ai)
+Uses the same facts checked for `ai-tokens`. No prices, model names or window sizes.
+- [ ] explain: "What a prompt needs, and what it can lose"
+- [ ] `ai-prm-unknown`
+- [ ] `ai-prm-cut-first`
+- [ ] `prompt-support-reply` (brief, 350-token budget, six rubric lines; the Fernhill Outdoor notes are invented and deliberately contain noise and repetition)
+
+## mock-news-feed (extra, design)
+- [ ] `mock-feed` (prompt, 5 follow-ups, 8 rubric items)
+
+## story-tradeoff (extra, stories)
+- [ ] `story-argued-tradeoff` (prompt and hints only; the owner's answers live in the browser, never here)

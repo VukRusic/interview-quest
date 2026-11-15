@@ -1,0 +1,283 @@
+import { UNITS, validateContent, indexItems } from '../../src/content/index';
+import { unit3 } from '../../src/content/unit3';
+import { SCENARIOS } from '../../src/content/scenarios';
+import { estimateTokens } from '../../src/core/tokens';
+
+const lesson = (id: string) => unit3.lessons.find((l) => l.id === id)!;
+const kinds = (id: string, kind: string) => lesson(id).steps.filter((s) => s.kind === kind);
+const item = (id: string) => indexItems([unit3]).get(id)!.step;
+const text = JSON.stringify(unit3);
+void SCENARIOS; void estimateTokens; void kinds; void item;
+
+test('unit 3 is the third unit and has its eleven lessons in the planned order', () => {
+  expect(UNITS[2]).toBe(unit3);
+  expect(unit3.lessons.map((l) => l.id)).toEqual([
+    'sql-vs-nosql', 'replication', 'sharding', 'consistency', 'dashboard-rush', 'talk-data-stores', 'hash-map',
+    'dotnet-async', 'ai-prompt-budget', 'mock-news-feed', 'story-tradeoff',
+  ]);
+});
+
+test('unit 3 has no bug-hunt lesson and no Angular', () => {
+  expect(unit3.lessons.filter((l) => l.pillar === 'review')).toEqual([]);
+  expect(text).not.toMatch(/angular/i);
+});
+
+test('ids are unique across all units', () => {
+  expect(validateContent(UNITS)).toEqual([]);
+});
+
+test('every unit 3 item uses a planned topic', () => {
+  const topics = new Set([
+    'data-modelling', 'replication', 'sharding', 'consistency', 'scaling-db', 'talk-storage', 'talk-search-analytics',
+    'hash-map', 'dotnet-async', 'ai-prompts', 'design-feed', 'behavioural',
+  ]);
+  for (const { step } of indexItems([unit3]).values()) expect(topics.has(step.topic), `${step.id}: ${step.topic}`).toBe(true);
+});
+
+test('pillars and slots are as planned', () => {
+  expect(unit3.lessons.map((l) => l.pillar)).toEqual([
+    'design', 'design', 'design', 'design', 'design', 'talk', 'algo', 'stack', 'ai', 'design', 'stories',
+  ]);
+  expect(unit3.lessons.map((l) => l.slot)).toEqual([
+    'lesson', 'lesson', 'lesson', 'lesson', 'practice', 'lesson', 'lesson', 'lesson', 'lesson', 'extra', 'extra',
+  ]);
+});
+
+describe('design lessons', () => {
+  const visuals: Record<string, string> = {
+    'sql-vs-nosql': 'data-shapes',
+    replication: 'replication-lag',
+    sharding: 'shard-keys',
+    consistency: 'quorum',
+  };
+
+  test.each(Object.keys(visuals))('%s opens with its visual and has at least 4 real quiz steps', (id) => {
+    const first = lesson(id).steps[0];
+    expect(first.kind === 'explain' && first.visual).toBe(visuals[id]);
+    const quiz = kinds(id, 'quiz');
+    expect(quiz.length).toBeGreaterThanOrEqual(4);
+    for (const q of quiz) if (q.kind === 'quiz') expect(q.why.length, q.id).toBeGreaterThan(80);
+  });
+
+  test('consistency ends with two bug cards, C# then Python', () => {
+    const steps = lesson('consistency').steps;
+    expect(steps.slice(-2).map((s) => s.kind === 'bug' && `${s.id}:${s.lang}`)).toEqual([
+      'bug-read-after-write:csharp',
+      'bug-lost-update:python',
+    ]);
+    expect(kinds('consistency', 'bug')).toHaveLength(2);
+  });
+
+  test('the quorum question has the arithmetic right: 5 replicas, W = 3 → R = 3', () => {
+    const q = item('cons-quorum');
+    if (q.kind !== 'quiz') throw new Error('not a quiz');
+    expect(q.options[q.answer]).toBe('3');
+  });
+
+  test('CAP is stated as a choice during a partition, not "pick any two"', () => {
+    const q = item('cons-cap');
+    if (q.kind !== 'quiz') throw new Error('not a quiz');
+    expect(q.options[q.answer]).toMatch(/network|partition/i);
+    expect(q.options[q.answer]).not.toMatch(/any two/i);
+  });
+});
+
+describe('practice lessons', () => {
+  test('dashboard-rush explains first, then runs the dashboard scenario', () => {
+    const steps = lesson('dashboard-rush').steps;
+    expect(steps.map((s) => s.kind)).toEqual(['explain', 'sandbox']);
+    expect(steps[1]).toMatchObject({ id: 'sandbox-dashboard-rush', topic: 'scaling-db', scenarioId: 'dashboard-rush' });
+    expect(SCENARIOS['dashboard-rush']).toBeDefined();
+  });
+
+  test('hash-map: a visual, three recognition questions, then two_sum', () => {
+    const steps = lesson('hash-map').steps;
+    const first = steps[0];
+    expect(first.kind === 'explain' && first.visual).toBe('hash-lookup');
+    const quiz = kinds('hash-map', 'quiz');
+    expect(quiz).toHaveLength(3);
+    for (const q of quiz) expect(q.kind === 'quiz' && q.id.startsWith('hm-which-')).toBe(true);
+    const p = steps[steps.length - 1];
+    expect(p.kind === 'python' && p.id).toBe('py-two-sum');
+    if (p.kind !== 'python') return;
+    expect(p.fn).toBe('two_sum');
+    expect(p.tests.length).toBeGreaterThanOrEqual(7);
+    expect(p.walkthrough.length).toBeGreaterThanOrEqual(8);
+    expect(p.tests).toContainEqual({ args: [[3, 3], 6], expected: [0, 1] });
+    expect(p.tests).toContainEqual({ args: [[5], 10], expected: null });
+  });
+
+  test('each two_sum test has at most one valid pair', () => {
+    const p = item('py-two-sum');
+    if (p.kind !== 'python') throw new Error('not python');
+    for (const t of p.tests) {
+      const [nums, target] = t.args as [number[], number];
+      let pairs = 0;
+      for (let i = 0; i < nums.length; i++) for (let j = i + 1; j < nums.length; j++) if (nums[i] + nums[j] === target) pairs++;
+      expect(pairs, JSON.stringify(t.args)).toBeLessThanOrEqual(1);
+      expect(pairs === 1, JSON.stringify(t.args)).toBe(t.expected !== null);
+    }
+  });
+});
+
+describe('tech talk deck: data stores', () => {
+  const cards = () => lesson('talk-data-stores').steps.flatMap((s) => (s.kind === 'quiz' ? [s] : []));
+
+  test('one short intro and nine cards, five on storage and four on search and analytics', () => {
+    const steps = lesson('talk-data-stores').steps;
+    expect(steps[0].kind).toBe('explain');
+    expect(steps.slice(1).every((s) => s.kind === 'quiz')).toBe(true);
+    expect(cards()).toHaveLength(9);
+    const by: Record<string, number> = {};
+    for (const c of cards()) by[c.topic] = (by[c.topic] ?? 0) + 1;
+    expect(by).toEqual({ 'talk-storage': 5, 'talk-search-analytics': 4 });
+  });
+
+  test('every card has a tt- id, at least three options, a real explanation and a look-up phrase', () => {
+    for (const c of cards()) {
+      expect(c.id.startsWith('tt-'), c.id).toBe(true);
+      expect(c.options.length, c.id).toBeGreaterThanOrEqual(3);
+      expect(c.why.length, c.id).toBeGreaterThan(80);
+      expect(c.lookUp, c.id).toBeTruthy();
+    }
+  });
+
+  test('look-up phrases are unique across every unit', () => {
+    const all = UNITS.flatMap((u) => u.lessons.flatMap((l) => l.steps)).flatMap((s) => (s.kind === 'quiz' && s.lookUp ? [s.lookUp] : []));
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  test('the right answer is not always in the same position', () => {
+    expect(new Set(cards().map((c) => c.answer)).size).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('.NET async lesson', () => {
+  test('opens with its visual, then exactly four questions and one C# bug card last', () => {
+    const steps = lesson('dotnet-async').steps;
+    const first = steps[0];
+    expect(first.kind === 'explain' && first.visual).toBe('await-threads');
+    expect(kinds('dotnet-async', 'quiz')).toHaveLength(4);
+    const last = steps[steps.length - 1];
+    expect(last.kind === 'bug' && `${last.id}:${last.lang}`).toBe('bug-sync-over-async:csharp');
+    expect(kinds('dotnet-async', 'bug')).toHaveLength(1);
+  });
+
+  test('blocking in ASP.NET Core is called starvation, never a deadlock', () => {
+    const bug = item('bug-sync-over-async');
+    if (bug.kind !== 'bug') throw new Error('not a bug');
+    expect(bug.why).toMatch(/starv/i);
+    const strings: string[] = [];
+    for (const s of lesson('dotnet-async').steps) {
+      if (s.kind === 'explain') strings.push(s.body);
+      if (s.kind === 'quiz') strings.push(s.prompt, s.why, ...s.options);
+      if (s.kind === 'bug') strings.push(s.why, s.fix, ...s.options);
+    }
+    const sentences = strings.flatMap((t) => t.split(/(?<=[.!?:])\s+/));
+    expect(sentences.some((s) => /ASP\.NET Core/.test(s))).toBe(true);
+    for (const s of sentences)
+      if (/ASP\.NET Core/.test(s) && /deadlocks?\b/i.test(s)) expect(s, s).toMatch(/\bno\b|\bnot\b|n't/i);
+  });
+});
+
+describe('prompt-budget lesson, mock interview and story', () => {
+  test('ai-prompt-budget: an explanation, two questions, then the prompt exercise', () => {
+    const steps = lesson('ai-prompt-budget').steps;
+    expect(steps.map((s) => s.kind)).toEqual(['explain', 'quiz', 'quiz', 'prompt']);
+    for (const q of kinds('ai-prompt-budget', 'quiz')) expect(q.kind === 'quiz' && q.id.startsWith('ai-prm-')).toBe(true);
+  });
+
+  test('the exercise has a 350-token budget, the six rubric lines and notes that are too long to paste', () => {
+    const p = item('prompt-support-reply');
+    if (p.kind !== 'prompt') throw new Error('not a prompt step');
+    expect(p.topic).toBe('ai-prompts');
+    expect(p.budget).toBe(350);
+    expect(p.rubric).toEqual([
+      'Says who the assistant is replying as, and to whom',
+      'States the task in one or two sentences',
+      'Includes the policy facts a reply needs, and leaves the rest out',
+      'Says what to do when the answer is not in those facts: hand over to a person, never guess',
+      'Specifies the reply’s length, tone and format',
+      'No repeated instructions or filler',
+    ]);
+    const size = estimateTokens(p.material ?? '');
+    expect(size).toBeGreaterThanOrEqual(600);
+    expect(size).toBeLessThanOrEqual(900);
+    expect(p.material).toMatch(/30 days/);
+    expect(p.material).toMatch(/team lead/);
+  });
+
+  test('ai-prompt-budget names no prices, model ids or window sizes that would go stale', () => {
+    const l = lesson('ai-prompt-budget');
+    const own = JSON.stringify({ ...l, steps: l.steps.map((s) => (s.kind === 'prompt' ? { ...s, material: '' } : s)) });
+    expect(own).not.toMatch(/\$\d|claude-|\d+k tokens|\d{3},\d{3}|opus|sonnet|haiku|gpt/i);
+  });
+
+  test('the news-feed mock has five follow-ups and a rubric of six to eight lines that uses this unit', () => {
+    const steps = lesson('mock-news-feed').steps;
+    expect(steps).toHaveLength(1);
+    const m = steps[0];
+    expect(m.kind === 'mock' && m.id).toBe('mock-feed');
+    if (m.kind !== 'mock') return;
+    expect(m.topic).toBe('design-feed');
+    expect(m.followUps).toHaveLength(5);
+    expect(m.rubric.length).toBeGreaterThanOrEqual(6);
+    expect(m.rubric.length).toBeLessThanOrEqual(8);
+    expect(m.rubric.join(' ')).toMatch(/replication|consistency/i);
+    expect(m.rubric.join(' ')).toMatch(/cursor/i);
+  });
+
+  test('the trade-off story has a prompt and at least three generic hints', () => {
+    const s = lesson('story-tradeoff').steps[0];
+    expect(s.kind === 'story' && s.id).toBe('story-argued-tradeoff');
+    if (s.kind !== 'story') return;
+    expect(s.topic).toBe('behavioural');
+    expect(s.hints.length).toBeGreaterThanOrEqual(3);
+  });
+
+  test('no lesson is still a placeholder', () => {
+    expect(text).not.toMatch(/coming soon/i);
+  });
+});
+
+describe('content corrections from review', () => {
+  const explainText = (id: string) => lesson(id).steps.flatMap((s) => (s.kind === 'explain' ? [s.body] : [])).join('\n');
+
+  test('replication: synchronous replication is credited with the failover gap only', () => {
+    expect(explainText('replication')).not.toMatch(/closes both gaps/);
+    expect(explainText('replication')).toMatch(/other followers still lag/);
+  });
+
+  test('bug-lost-update: the snippet is valid for a standard driver and no wrong option is arguably true', () => {
+    const b = item('bug-lost-update');
+    if (b.kind !== 'bug') throw new Error('not a bug');
+    expect(b.code).not.toMatch(/row\.stock/);
+    expect(b.code).toMatch(/cur\.fetchone\(\)\[0\]/);
+    expect(b.options.join(' ')).not.toMatch(/fetchone/);
+    const lines = b.code.split('\n');
+    expect(lines[b.bugLines[0] - 1]).toMatch(/new_stock = stock - quantity/);
+    expect(lines[b.bugLines[1] - 1]).toMatch(/UPDATE products SET stock = %s/);
+  });
+
+  test('questions with more than one workable answer ask for the smallest one', () => {
+    const q = item('cons-quorum');
+    const h = item('hm-which-set');
+    expect(q.kind === 'quiz' && q.prompt).toMatch(/fewest/);
+    expect(h.kind === 'quiz' && h.prompt).toMatch(/least/);
+  });
+
+  test('tt-wide-column: "no single leader" is said of Cassandra, not of every wide-column store', () => {
+    const c = item('tt-wide-column');
+    expect(c.kind === 'quiz' && c.why).toMatch(/Cassandra has no single leader/);
+  });
+
+  test('dashboard-rush admits what the model simplifies about failover', () => {
+    expect(SCENARIOS['dashboard-rush'].lesson).toMatch(/last few writes/);
+    expect(SCENARIOS['dashboard-rush'].lesson).toMatch(/until a replica is promoted/);
+  });
+
+  test('the support notes say large refunds also need a team lead, without implying they break the rules', () => {
+    const p = item('prompt-support-reply');
+    expect(p.kind === 'prompt' && p.material).toMatch(/Any refund above 400 euros also needs a team lead/);
+  });
+});

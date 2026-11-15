@@ -74,3 +74,22 @@ describe('milestone 2 schema additions', () => {
     expect(() => QuizStepSchema.parse({ ...base, lookUp: 'www.example.com' })).toThrow();
   });
 });
+
+describe('prompt step', () => {
+  const prompt = (over: object = {}) => ({ kind: 'prompt', id: 'pr', topic: 't', brief: 'b', budget: 100, rubric: ['r'], ...over });
+
+  test('a prompt step parses, and needs a budget of at least 50 and a rubric', () => {
+    expect(unitWith([prompt()]).lessons[0].steps[0].kind).toBe('prompt');
+    expect(() => unitWith([prompt({ budget: 49 })])).toThrow();
+    expect(() => unitWith([prompt({ rubric: [] })])).toThrow();
+  });
+
+  test('validateContent rejects material that already fits the budget', () => {
+    expect(validateContent([unitWith([prompt({ material: 'x'.repeat(400) })])])).toEqual(['pr: material already fits the budget']);
+  });
+
+  test('validateContent accepts material larger than the budget, and no material at all', () => {
+    expect(validateContent([unitWith([prompt({ material: 'x'.repeat(404) })])])).toEqual([]);
+    expect(validateContent([unitWith([prompt()])])).toEqual([]);
+  });
+});
