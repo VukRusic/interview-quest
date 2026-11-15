@@ -141,3 +141,17 @@ test('the review text contains the brief, the budget, the estimate, the draft an
   for (const r of step.rubric) expect(text).toContain(r);
   expect(promptReviewPrompt(step, '  ')).toContain('(no prompt written yet)');
 });
+
+test('a prompt emptied after grading started cannot be finished', async () => {
+  const { write, onDone } = show();
+  write('Reply briefly.');
+  await userEvent.click(gradeBtn());
+  for (const r of step.rubric) await userEvent.click(screen.getByRole('checkbox', { name: r }));
+  write('   ');
+  expect(screen.getByRole('button', { name: 'Finish' })).toBeDisabled();
+  expect(screen.getByTestId('fits-budget')).toHaveTextContent('Nothing written yet');
+  expect(screen.getByTestId('fits-budget')).not.toHaveTextContent('0 over');
+  write('Reply briefly.');
+  await userEvent.click(screen.getByRole('button', { name: 'Finish' }));
+  expect(onDone).toHaveBeenCalledTimes(1);
+});

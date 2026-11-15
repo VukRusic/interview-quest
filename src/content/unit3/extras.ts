@@ -127,7 +127,7 @@ Faulty items. If an item is faulty within 12 months of delivery, the customer ca
 
 Return shipping. For faulty items we send a prepaid label. For change-of-mind returns the customer pays return postage. Remember: unused items, 30 days, original packaging.
 
-Exceptions. Anything outside these rules (a return after 30 days, a missing receipt, an item bought as a gift, a refund above 400 euros) can only be approved by a care team lead. Agents and assistants must not promise an exception. Say that a team lead will review it and reply within 2 working days.
+Exceptions. Anything outside these rules (a return after 30 days, a missing receipt, an item bought as a gift) can only be approved by a care team lead. Any refund above 400 euros also needs a team lead, even when it is within the rules. Agents and assistants must not promise an exception. Say that a team lead will review it and reply within 2 working days.
 
 Never promise. Never promise a delivery date for a replacement, never promise that a refund has already arrived, and never offer compensation, vouchers or discounts. Only a team lead can offer those.
 

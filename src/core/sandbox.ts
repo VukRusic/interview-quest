@@ -69,7 +69,7 @@ export function simulate(arch: Architecture, load: Load): Metrics {
   let replicaLoad: number;
   if (load.dbDown) {
     primaryLoad = 0;
-    // With a queue, writes wait until the primary is back instead of failing.
+    // With a queue, writes wait until a replica is promoted instead of failing.
     const lostWrites = arch.queue > 0 ? 0 : writes;
     if (arch.replica > 0) {
       replicaLoad = reads;

@@ -200,7 +200,7 @@ export function SandboxStep({ step, onDone }: StepProps<Sandbox>) {
             : ev.load.dbDown && arch.replica === 0
               ? 'The database is down and nothing else can answer reads.'
               : ev.load.dbDown && arch.queue > 0
-                ? 'Writes are waiting in the queue until the primary is back.'
+                ? 'Writes are waiting in the queue until a replica is promoted.'
               : noApps
                 ? 'No app server is left to answer requests.'
                 : 'No component is near its limit.'}

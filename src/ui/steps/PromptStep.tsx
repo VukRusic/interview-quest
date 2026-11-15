@@ -86,7 +86,10 @@ export function PromptStep({ step, onDone }: StepProps<Prompt>) {
           <p className={`choice budget-result ${fits ? 'is-right' : 'is-wrong'}`} data-testid="fits-budget">
             <span aria-hidden="true">{fits ? '✓' : '✗'}</span>
             <span>
-              Fits the budget <span className="muted">({fits ? 'checked for you' : `about ${over} over`})</span>
+              Fits the budget{' '}
+              <span className="muted">
+                ({fits ? 'checked for you' : used === 0 ? 'Nothing written yet' : `about ${over} over`})
+              </span>
             </span>
           </p>
           {step.rubric.map((r, i) => (
@@ -102,6 +105,7 @@ export function PromptStep({ step, onDone }: StepProps<Prompt>) {
           <button
             type="button"
             className="btn btn-primary"
+            disabled={used === 0}
             onClick={() => onDone({ selfGrade: (checked.filter(Boolean).length + (fits ? 1 : 0)) / (step.rubric.length + 1) })}
           >
             Finish

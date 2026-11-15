@@ -76,7 +76,7 @@ Nine cards. For each, pick what that store is built to do. One correct sentence 
         'Very high volumes of writes spread over many nodes, with rows found by a partition key designed around your queries',
       ],
       3,
-      'It scales writes almost linearly by adding nodes and has no single leader to fail. The cost is that you design tables around the exact queries you will run: rows are found by partition key, and joins or unplanned queries are not available. The other options describe a relational database, a search engine and object storage.',
+      'It scales writes almost linearly by adding nodes, and Cassandra has no single leader to fail. The cost is that you design tables around the exact queries you will run: rows are found by partition key, and joins or unplanned queries are not available. The other options describe a relational database, a search engine and object storage.',
       'Cassandra modelling: partition key and clustering key',
     ),
     card(

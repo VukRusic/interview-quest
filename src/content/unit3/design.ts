@@ -121,7 +121,7 @@ The catch is timing. With **asynchronous** replication the leader confirms a wri
       title: 'What the delay costs you',
       body: `- **Stale reads.** A user saves a change, the next page reads from a follower that has not received it yet, and the old value appears. The usual fix is **read-your-own-writes**: for a short time after a user writes, read that user's data from the leader.
 - **Lost writes on failover.** If the leader dies before a follower received its last writes, those writes are gone when the follower takes over.
-- **Synchronous replication** closes both gaps, because a write is only confirmed once a follower has it. The price is slower writes, and writes that stall when that follower cannot be reached. Many systems keep one follower synchronous and the rest asynchronous.
+- **Synchronous replication** closes the failover gap, because a write is only confirmed once a follower has it. The price is slower writes, and writes that stall when that follower cannot be reached. Many systems keep one follower synchronous and the rest asynchronous, and those other followers still lag, so stale reads remain possible.
 - **Two leaders at once.** If a network fault hides the leader and a follower is promoted while the old leader is still running, both accept writes and the data diverges. This is called **split brain**, and failover has to make sure the old leader is really out before a new one starts.
 
 A replica is not a backup. It faithfully copies a mistaken delete within seconds.`,
@@ -306,15 +306,15 @@ public async Task<IActionResult> UpdateProfile(ProfileUpdate update)
 }`;
 
 const LOST_UPDATE = `def reserve(product_id, quantity):
-    row = db.execute(
-        "SELECT stock FROM products WHERE id = %s", (product_id,)
-    ).fetchone()
+    cur = db.cursor()
+    cur.execute("SELECT stock FROM products WHERE id = %s", (product_id,))
+    stock = cur.fetchone()[0]
 
-    if row.stock < quantity:
+    if stock < quantity:
         raise OutOfStock(product_id)
 
-    new_stock = row.stock - quantity
-    db.execute(
+    new_stock = stock - quantity
+    cur.execute(
         "UPDATE products SET stock = %s WHERE id = %s",
         (new_stock, product_id),
     )
@@ -378,7 +378,7 @@ The useful interview move is to make that choice per feature:
     quiz(
       'cons-quorum',
       'consistency',
-      'There are 5 replicas and a write waits for 3 of them. How many must a read ask to be sure it sees the latest write?',
+      'There are 5 replicas and a write waits for 3 of them. What is the fewest a read must ask to be sure it sees the latest write?',
       ['1', '2', '3', '5'],
       2,
       'The rule is R + W > N, so R must be more than 5 − 3 = 2. Any 3 of the 5 replicas must include at least one of the 3 that took the write. Asking all 5 would also work, but then a read fails as soon as a single replica is down.',
@@ -422,7 +422,7 @@ The useful interview move is to make that choice per feature:
       bugLines: [9, 11],
       options: [
         'The SELECT is open to SQL injection',
-        'fetchone() returns a list, so row.stock fails',
+        'The cursor is never closed, so the UPDATE cannot run',
         'commit() has to come before the UPDATE',
         'Two requests can read the same stock, and the second write overwrites the first, so the product is oversold',
       ],

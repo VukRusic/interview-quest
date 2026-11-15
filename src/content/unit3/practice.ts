@@ -67,7 +67,7 @@ The signal in a problem statement: **unsorted** input, and a question about pair
       kind: 'quiz',
       id: 'hm-which-set',
       topic: 'hash-map',
-      prompt: 'Decide in one pass whether a list contains any value twice. What is enough?',
+      prompt: 'Decide in one pass whether a list contains any value twice. What is the least you need to keep?',
       options: [
         'A set of the values seen so far',
         'A hash map from each value to its position',

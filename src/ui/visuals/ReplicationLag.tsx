@@ -59,7 +59,7 @@ export function ReplicationLag() {
         {behind
           ? 'A read from the follower right now returns the old price. If the leader died at this moment, the write would be lost.'
           : sync && leader === 20
-            ? 'The follower already has the write, so a read from it is current and a failover loses nothing. The price is a slower write, and a write that cannot finish while the follower is unreachable.'
+            ? 'This follower already has the write, so a failover to it loses nothing and a read from it sees the new price. Any other followers would still lag. The price is a slower write, and a write that cannot finish while the follower is unreachable.'
             : 'Leader and follower agree.'}
       </p>
     </div>

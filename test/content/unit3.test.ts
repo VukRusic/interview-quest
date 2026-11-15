@@ -239,3 +239,45 @@ describe('prompt-budget lesson, mock interview and story', () => {
     expect(text).not.toMatch(/coming soon/i);
   });
 });
+
+describe('content corrections from review', () => {
+  const explainText = (id: string) => lesson(id).steps.flatMap((s) => (s.kind === 'explain' ? [s.body] : [])).join('\n');
+
+  test('replication: synchronous replication is credited with the failover gap only', () => {
+    expect(explainText('replication')).not.toMatch(/closes both gaps/);
+    expect(explainText('replication')).toMatch(/other followers still lag/);
+  });
+
+  test('bug-lost-update: the snippet is valid for a standard driver and no wrong option is arguably true', () => {
+    const b = item('bug-lost-update');
+    if (b.kind !== 'bug') throw new Error('not a bug');
+    expect(b.code).not.toMatch(/row\.stock/);
+    expect(b.code).toMatch(/cur\.fetchone\(\)\[0\]/);
+    expect(b.options.join(' ')).not.toMatch(/fetchone/);
+    const lines = b.code.split('\n');
+    expect(lines[b.bugLines[0] - 1]).toMatch(/new_stock = stock - quantity/);
+    expect(lines[b.bugLines[1] - 1]).toMatch(/UPDATE products SET stock = %s/);
+  });
+
+  test('questions with more than one workable answer ask for the smallest one', () => {
+    const q = item('cons-quorum');
+    const h = item('hm-which-set');
+    expect(q.kind === 'quiz' && q.prompt).toMatch(/fewest/);
+    expect(h.kind === 'quiz' && h.prompt).toMatch(/least/);
+  });
+
+  test('tt-wide-column: "no single leader" is said of Cassandra, not of every wide-column store', () => {
+    const c = item('tt-wide-column');
+    expect(c.kind === 'quiz' && c.why).toMatch(/Cassandra has no single leader/);
+  });
+
+  test('dashboard-rush admits what the model simplifies about failover', () => {
+    expect(SCENARIOS['dashboard-rush'].lesson).toMatch(/last few writes/);
+    expect(SCENARIOS['dashboard-rush'].lesson).toMatch(/until a replica is promoted/);
+  });
+
+  test('the support notes say large refunds also need a team lead, without implying they break the rules', () => {
+    const p = item('prompt-support-reply');
+    expect(p.kind === 'prompt' && p.material).toMatch(/Any refund above 400 euros also needs a team lead/);
+  });
+});
